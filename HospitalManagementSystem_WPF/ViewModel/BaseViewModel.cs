@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace HospitalManagementSystem.WPF.ViewModel
+namespace HospitalManagementSystem_WPF.ViewModel
 {
     public class BaseViewModel : INotifyPropertyChanged
     {

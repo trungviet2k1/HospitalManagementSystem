@@ -1,4 +1,4 @@
-﻿namespace HospitalManagementSystem.BusinessObject.Models;
+﻿namespace BusinessObject.Models;
 
 public partial class UserLog
 {

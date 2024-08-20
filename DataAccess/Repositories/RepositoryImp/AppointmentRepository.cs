@@ -1,8 +1,8 @@
-﻿using HospitalManagementSystem.BusinessObject.Models;
-using HospitalManagementSystem.DataAccess.DAO;
-using HospitalManagementSystem.DataAccess.Repositories.IRepository;
+﻿using BusinessObject.Models;
+using DataAccess.DAO;
+using DataAccess.Repositories.IRepository;
 
-namespace HospitalManagementSystem.DataAccess.Repositories.RepositoryImp
+namespace DataAccess.Repositories.RepositoryImp
 {
     public class AppointmentRepository : IAppointmentRepository
     {

@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BusinessObject.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace HospitalManagementSystem.BusinessObject.Models;
+namespace DataAccess.DBContext;
 
 public partial class HospitalManagementSystemContext : DbContext
 {

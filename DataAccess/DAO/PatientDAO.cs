@@ -1,7 +1,8 @@
-﻿using HospitalManagementSystem.BusinessObject.Models;
+﻿using BusinessObject.Models;
+using DataAccess.DBContext;
 using Microsoft.EntityFrameworkCore;
 
-namespace HospitalManagementSystem.DataAccess.DAO
+namespace DataAccess.DAO
 {
     public class PatientDAO
     {

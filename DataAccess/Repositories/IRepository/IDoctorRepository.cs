@@ -1,6 +1,6 @@
-﻿using HospitalManagementSystem.BusinessObject.Models;
+﻿using BusinessObject.Models;
 
-namespace HospitalManagementSystem.DataAccess.Repositories.IRepository
+namespace DataAccess.Repositories.IRepository
 {
     public interface IDoctorRepository
     {

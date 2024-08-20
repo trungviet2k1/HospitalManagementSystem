@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace HospitalManagementSystem.WPF
+namespace HospitalManagementSystem.HospitalManagementSystem_WPF
 {
     public static class ServiceLocator
     {
