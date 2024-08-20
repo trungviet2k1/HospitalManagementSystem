@@ -4,10 +4,11 @@ namespace DataAccess.Repositories.IRepository
 {
     public interface IUserRepository
     {
-        User GetUserByUsername(string username);
-        IEnumerable<User> GetAllUsers();
-        void AddUser(User user);
-        void UpdateUser(User user);
-        void DeleteUser(int userId);
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<User> GetUserByIdAsync(int userId);
+        Task<User> GetUserByUsernameAsync(string username);
+        Task AddUserAsync(User user);
+        Task UpdateUserAsync(User user);
+        Task DeleteUserAsync(int userId);
     }
 }

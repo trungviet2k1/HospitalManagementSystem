@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using HospitalManagementSystem_WPF.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace HospitalManagementSystem.HospitalManagementSystem_WPF
 {
@@ -7,6 +9,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = ServiceLocator.ServiceProvider.GetRequiredService<MainViewModel>();
         }
     }
 }

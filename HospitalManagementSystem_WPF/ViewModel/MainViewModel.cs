@@ -1,18 +1,70 @@
-﻿using HospitalManagementSystem.HospitalManagementSystem_WPF;
-using HospitalManagementSystem_WPF.View;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Input;
 
 namespace HospitalManagementSystem_WPF.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
-        public MainViewModel()
+        private readonly IServiceProvider _serviceProvider;
+        private BaseViewModel? _currentViewModel;
+
+        public BaseViewModel? CurrentViewModel
         {
-            LoginWindow loginWindow = new ();
+            get => _currentViewModel;
+            set
             {
-                ServiceLocator.ServiceProvider.GetRequiredService<LoginWindow>();
-                loginWindow.ShowDialog();
+                _currentViewModel = value;
+                OnPropertyChanged(nameof(CurrentViewModel));
             }
+        }
+
+        public ICommand ShowRoomsCommand { get; }
+        public ICommand ShowDepartmentsCommand { get; }
+        public ICommand ShowDoctorsCommand { get; }
+        public ICommand ShowMedicationsCommand { get; }
+        public ICommand ShowPatientsCommand { get; }
+        public ICommand ShowInvoicesCommand { get; }
+
+        public MainViewModel(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+
+            ShowRoomsCommand = new RelayCommand(ExecuteShowRooms);
+            ShowDepartmentsCommand = new RelayCommand(ExecuteShowDepartments);
+            ShowDoctorsCommand = new RelayCommand(ExecuteShowDoctors);
+            ShowMedicationsCommand = new RelayCommand(ExecuteShowMedications);
+            ShowPatientsCommand = new RelayCommand(ExecuteShowPatients);
+            ShowInvoicesCommand = new RelayCommand(ExecuteShowInvoices);
+        }
+
+        private void ExecuteShowRooms()
+        {
+            CurrentViewModel = _serviceProvider.GetRequiredService<RoomViewModel>();
+        }
+
+        private void ExecuteShowDepartments()
+        {
+            CurrentViewModel = _serviceProvider.GetRequiredService<DepartmentViewModel>();
+        }
+
+        private void ExecuteShowDoctors()
+        {
+            CurrentViewModel = _serviceProvider.GetRequiredService<DoctorViewModel>();
+        }
+
+        private void ExecuteShowMedications()
+        {
+            CurrentViewModel = _serviceProvider.GetRequiredService<MedicationViewModel>();
+        }
+
+        private void ExecuteShowPatients()
+        {
+            CurrentViewModel = _serviceProvider.GetRequiredService<PatientViewModel>();
+        }
+
+        private void ExecuteShowInvoices()
+        {
+            CurrentViewModel = _serviceProvider.GetRequiredService<InvoiceViewModel>();
         }
     }
 }

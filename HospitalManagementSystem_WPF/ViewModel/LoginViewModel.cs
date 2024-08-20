@@ -1,15 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DataAccess.Repositories.IRepository;
+using BusinessObject.Models;
 
 namespace HospitalManagementSystem_WPF.ViewModel
 {
     public class LoginViewModel : BaseViewModel
     {
-        public LoginViewModel() 
-        { 
+        private readonly IUserRepository _userRepository;
+
+        public LoginViewModel(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
+
+        public async Task<bool> LoginAsync(string username, string password)
+        {
+            User user = await _userRepository.GetUserByUsernameAsync(username);
+            return user != null && user.VerifyPassword(password);
         }
     }
 }

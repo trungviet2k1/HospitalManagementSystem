@@ -33,15 +33,22 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<IUserRepository, UserRepository>();
 
             // Đăng ký ViewModel
-            services.AddTransient<LoginViewModel>();
             services.AddTransient<MainViewModel>();
+            services.AddTransient<LoginViewModel>();
+            services.AddTransient<RoomViewModel>();
+            services.AddTransient<DepartmentViewModel>();
+            services.AddTransient<DoctorViewModel>();
+            services.AddTransient<MedicationViewModel>();
+            services.AddTransient<PatientViewModel>();
+            services.AddTransient<InvoiceViewModel>();
 
             // Đăng ký View
             services.AddTransient<LoginWindow>();
+            services.AddTransient<MainWindow>();
 
             // Đăng ký DbContext
             services.AddDbContext<HospitalManagementSystemContext>(options =>
-                options.UseSqlServer("DBContext"));
+                options.UseSqlServer("Server=(local); uid=sa; pwd=123; database=HospitalManagementSystem; TrustServerCertificate=True;"));
 
             // Cấu hình ServiceProvider
             ServiceLocator.ConfigureServices(services);
@@ -49,17 +56,6 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             // Khởi tạo LoginWindow và hiển thị
             var loginWindow = ServiceLocator.ServiceProvider.GetRequiredService<LoginWindow>();
             loginWindow.ShowDialog();
-
-            // Nếu người dùng đăng nhập thành công, khởi tạo MainWindow và hiển thị
-            if (loginWindow.DialogResult == true)
-            {
-                var mainWindow = ServiceLocator.ServiceProvider.GetRequiredService<MainWindow>();
-                mainWindow.Show();
-            }
-            else
-            {
-                //Do some thing
-            }
         }
     }
 }

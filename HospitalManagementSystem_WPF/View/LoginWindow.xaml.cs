@@ -1,27 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HospitalManagementSystem.HospitalManagementSystem_WPF;
+using HospitalManagementSystem_WPF.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace HospitalManagementSystem_WPF.View
 {
-    /// <summary>
-    /// Interaction logic for LoginWindow.xaml
-    /// </summary>
     public partial class LoginWindow : Window
     {
+        private readonly LoginViewModel _viewModel;
+
         public LoginWindow()
         {
             InitializeComponent();
+            _viewModel = ServiceLocator.ServiceProvider.GetRequiredService<LoginViewModel>();
+            DataContext = _viewModel;
+        }
+
+        private async void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            string username = UsernameTextBox.Text;
+            string password = PasswordBox.Password;
+
+            bool loginSuccessful = await _viewModel.LoginAsync(username, password);
+
+            if (loginSuccessful)
+            {
+                var mainWindow = ServiceLocator.ServiceProvider.GetRequiredService<MainWindow>();
+                mainWindow.Show();
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Invalid username or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

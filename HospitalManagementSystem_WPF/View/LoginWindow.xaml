@@ -5,8 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HospitalManagementSystem_WPF.View"
         mc:Ignorable="d"
-        Title="LoginWindow" Height="300" Width="325">
+        Title="Login" Height="300" Width="300">
     <Grid>
-        
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Username:" Margin="0,0,0,5"/>
+            <TextBox x:Name="UsernameTextBox" Width="200"/>
+            <TextBlock Text="Password:" Margin="0,0,0,5"/>
+            <PasswordBox x:Name="PasswordBox" Width="200"/>
+            <Button Content="Login" Width="100" Margin="20,10,0,0" Click="LoginButton_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

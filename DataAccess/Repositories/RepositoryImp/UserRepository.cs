@@ -13,29 +13,34 @@ namespace DataAccess.Repositories.RepositoryImp
             _userDAO = userDAO;
         }
 
-        public User GetUserByUsername(string username)
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return _userDAO.GetUserByUsername(username);
+            return await _userDAO.GetAllUsersAsync();
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task<User> GetUserByIdAsync(int userId)
         {
-            return _userDAO.GetAllUsers();
+            return await _userDAO.GetUserByIdAsync(userId);
         }
 
-        public void AddUser(User user)
+        public async Task<User> GetUserByUsernameAsync(string username)
         {
-            _userDAO.AddUser(user);
+            return await _userDAO.GetUserByUsernameAsync(username);
         }
 
-        public void UpdateUser(User user)
+        public async Task AddUserAsync(User user)
         {
-            _userDAO.UpdateUser(user);
+            await _userDAO.AddUserAsync(user);
         }
 
-        public void DeleteUser(int userId)
+        public async Task UpdateUserAsync(User user)
         {
-            _userDAO.DeleteUser(userId);
+            await _userDAO.UpdateUserAsync(user);
+        }
+
+        public async Task DeleteUserAsync(int userId)
+        {
+            await _userDAO.DeleteUserAsync(userId);
         }
     }
 }

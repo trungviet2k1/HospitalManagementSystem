@@ -7,6 +7,43 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-
+        <TabControl>
+            <TabItem Header="Rooms">
+                <!-- Content for Rooms -->
+                <ListView ItemsSource="{Binding Rooms}">
+                    <!-- Define your DataTemplate for Room items here -->
+                </ListView>
+            </TabItem>
+            <TabItem Header="Departments">
+                <!-- Content for Departments -->
+                <ListView ItemsSource="{Binding Departments}">
+                    <!-- Define your DataTemplate for Department items here -->
+                </ListView>
+            </TabItem>
+            <TabItem Header="Doctors">
+                <!-- Content for Doctors -->
+                <ListView ItemsSource="{Binding Doctors}">
+                    <!-- Define your DataTemplate for Doctor items here -->
+                </ListView>
+            </TabItem>
+            <TabItem Header="Medications">
+                <!-- Content for Medications -->
+                <ListView ItemsSource="{Binding Medications}">
+                    <!-- Define your DataTemplate for Medication items here -->
+                </ListView>
+            </TabItem>
+            <TabItem Header="Patients">
+                <!-- Content for Patients -->
+                <ListView ItemsSource="{Binding Patients}">
+                    <!-- Define your DataTemplate for Patient items here -->
+                </ListView>
+            </TabItem>
+            <TabItem Header="Invoices">
+                <!-- Content for Invoices -->
+                <ListView ItemsSource="{Binding Invoices}">
+                    <!-- Define your DataTemplate for Invoice items here -->
+                </ListView>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

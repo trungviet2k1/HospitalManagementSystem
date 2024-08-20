@@ -1,5 +1,6 @@
 ﻿using BusinessObject.Models;
 using DataAccess.DBContext;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.DAO
 {
@@ -12,35 +13,42 @@ namespace DataAccess.DAO
             _context = context;
         }
 
-        public User GetUserByUsername(string username)
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return _context.Users.SingleOrDefault(u => u.Username == username);
+            return await _context.Users.ToListAsync();
         }
 
-        public List<User> GetAllUsers()
+        public async Task<User> GetUserByIdAsync(int userId)
         {
-            return _context.Users.ToList();
+            var user = await _context.Users.FindAsync(userId);
+            return user ?? new User();
         }
 
-        public void AddUser(User user)
+        public async Task<User> GetUserByUsernameAsync(string username)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return user ?? new User();
+        }
+
+        public async Task AddUserAsync(User user)
         {
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void UpdateUser(User user)
+        public async Task UpdateUserAsync(User user)
         {
             _context.Users.Update(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteUser(int userId)
+        public async Task DeleteUserAsync(int userId)
         {
-            var user = _context.Users.Find(userId);
+            var user = await _context.Users.FindAsync(userId);
             if (user != null)
             {
                 _context.Users.Remove(user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }
