@@ -14,8 +14,12 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
         public async Task<bool> LoginAsync(string username, string password)
         {
-            User user = await _userRepository.GetUserByUsernameAsync(username);
-            return user != null && user.VerifyPassword(password);
+            var user = await _userRepository.GetUserByUsernameAsync(username);
+            if (user != null && user.VerifyPassword(password))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

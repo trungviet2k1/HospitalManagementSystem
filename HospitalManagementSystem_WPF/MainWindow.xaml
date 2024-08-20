@@ -4,9 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HospitalManagementSystem.HospitalManagementSystem_WPF"
+        xmlns:viewmodel="clr-namespace:HospitalManagementSystem_WPF.ViewModel"
+        d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        WindowStartupLocation="CenterScreen"
+        Title="Hospital Management System - HMY" Height="450" Width="800">
     <Grid>
+        <!-- TabControl to the left -->
         <TabControl>
             <TabItem Header="Rooms">
                 <!-- Content for Rooms -->
@@ -44,6 +48,8 @@
                     <!-- Define your DataTemplate for Invoice items here -->
                 </ListView>
             </TabItem>
+            <!-- UserDetails TextBlock to the right -->
+            <TextBlock Text="{Binding UserDetails}" Margin="10" FontSize="16" FontWeight="Bold" Foreground="DarkGreen" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </TabControl>
     </Grid>
 </Window>

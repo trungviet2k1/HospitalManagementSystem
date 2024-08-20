@@ -6,9 +6,9 @@ namespace DataAccess.DAO
 {
     public class UserDAO
     {
-        private readonly HospitalManagementSystemContext _context;
+        private readonly HospitalManagementDbContext _context;
 
-        public UserDAO(HospitalManagementSystemContext context)
+        public UserDAO(HospitalManagementDbContext context)
         {
             _context = context;
         }

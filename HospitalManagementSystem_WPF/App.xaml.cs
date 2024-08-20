@@ -21,14 +21,12 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             // Đăng ký các DAO
             services.AddTransient<AppointmentDAO>();
             services.AddTransient<DepartmentDAO>();
-            services.AddTransient<DoctorDAO>();
             services.AddTransient<PatientDAO>();
             services.AddTransient<UserDAO>();
 
             // Đăng ký các Repository
             services.AddTransient<IAppointmentRepository, AppointmentRepository>();
             services.AddTransient<IDepartmentRepository, DepartmentRepository>();
-            services.AddTransient<IDoctorRepository, DoctorRepository>();
             services.AddTransient<IPatientRepository, PatientRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
 
@@ -47,14 +45,15 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<MainWindow>();
 
             // Đăng ký DbContext
-            services.AddDbContext<HospitalManagementSystemContext>(options =>
-                options.UseSqlServer("Server=(local); uid=sa; pwd=123; database=HospitalManagementSystem; TrustServerCertificate=True;"));
+            services.AddDbContext<HospitalManagementDbContext>(options =>
+                options.UseSqlServer("Server=(local); uid=sa; pwd=123; database=HospitalManagementDB; TrustServerCertificate=True;"));
 
             // Cấu hình ServiceProvider
             ServiceLocator.ConfigureServices(services);
 
             // Khởi tạo LoginWindow và hiển thị
-            var loginWindow = ServiceLocator.ServiceProvider.GetRequiredService<LoginWindow>();
+            var loginWindow = ServiceLocator.ServiceProvider?.GetRequiredService<LoginWindow>();
+            if (loginWindow == null) return;
             loginWindow.ShowDialog();
         }
     }

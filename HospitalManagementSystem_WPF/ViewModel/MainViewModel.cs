@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Windows.Input;
+﻿using System.Windows.Input;
+using BusinessObject.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HospitalManagementSystem_WPF.ViewModel
 {
@@ -25,7 +26,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
         public ICommand ShowPatientsCommand { get; }
         public ICommand ShowInvoicesCommand { get; }
 
-        public MainViewModel(IServiceProvider serviceProvider)
+        public MainViewModel(IServiceProvider serviceProvider, User user)
         {
             _serviceProvider = serviceProvider;
 
