@@ -58,7 +58,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             }
             else
             {
-                Application.Current.Shutdown();
+                //Do some thing
             }
         }
     }
