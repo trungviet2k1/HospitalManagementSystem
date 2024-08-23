@@ -12,49 +12,65 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
 {
     public partial class App : Application
     {
+        public static IServiceProvider? ServiceProvider { get; private set; }
+
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
+            // Cấu hình ServiceProvider
             var services = new ServiceCollection();
+            ConfigureServices(services);
+            ServiceProvider = services.BuildServiceProvider();
+
+            // Khởi tạo LoginWindow và hiển thị
+            var loginWindow = ServiceProvider.GetRequiredService<LoginWindow>();
+            loginWindow.ShowDialog();
+
+            // Khởi tạo MainWindow và hiển thị sau khi đăng nhập thành công
+            var mainWindow = new MainWindow
+            {
+                DataContext = ServiceProvider.GetRequiredService<MainViewModel>()
+            };
+            mainWindow.Show();
+
+            base.OnStartup(e);
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            // Đăng ký ViewModel
+            services.AddSingleton<MainViewModel>();
+            services.AddTransient<LoginViewModel>();
+            services.AddTransient<StaffViewModel>();
+            services.AddTransient<DoctorViewModel>();
+            services.AddTransient<NurseViewModel>();
+            services.AddTransient<ReceptionistViewModel>();
+            services.AddTransient<DepartmentViewModel>();
+            services.AddTransient<RoomViewModel>();
+            services.AddTransient<PatientViewModel>();
+            services.AddTransient<MedicationViewModel>();
+            services.AddTransient<InvoiceViewModel>();
+
+            // Đăng ký View
+            services.AddSingleton<MainWindow>();
+            services.AddTransient<LoginWindow>();
 
             // Đăng ký các DAO
             services.AddTransient<AppointmentDAO>();
             services.AddTransient<DepartmentDAO>();
             services.AddTransient<PatientDAO>();
+            services.AddTransient<RoomDAO>();
             services.AddTransient<UserDAO>();
 
             // Đăng ký các Repository
-            services.AddTransient<IAppointmentRepository, AppointmentRepository>();
-            services.AddTransient<IDepartmentRepository, DepartmentRepository>();
-            services.AddTransient<IPatientRepository, PatientRepository>();
-            services.AddTransient<IUserRepository, UserRepository>();
-
-            // Đăng ký ViewModel
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<LoginViewModel>();
-            services.AddTransient<RoomViewModel>();
-            services.AddTransient<DepartmentViewModel>();
-            services.AddTransient<DoctorViewModel>();
-            services.AddTransient<MedicationViewModel>();
-            services.AddTransient<PatientViewModel>();
-            services.AddTransient<InvoiceViewModel>();
-
-            // Đăng ký View
-            services.AddTransient<LoginWindow>();
-            services.AddTransient<MainWindow>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddScoped<IPatientRepository, PatientRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             // Đăng ký DbContext
             services.AddDbContext<HospitalManagementDbContext>(options =>
                 options.UseSqlServer("Server=(local); uid=sa; pwd=123; database=HospitalManagementDB; TrustServerCertificate=True;"));
-
-            // Cấu hình ServiceProvider
-            ServiceLocator.ConfigureServices(services);
-
-            // Khởi tạo LoginWindow và hiển thị
-            var loginWindow = ServiceLocator.ServiceProvider?.GetRequiredService<LoginWindow>();
-            if (loginWindow == null) return;
-            loginWindow.ShowDialog();
         }
     }
 }

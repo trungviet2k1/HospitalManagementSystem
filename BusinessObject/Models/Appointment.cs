@@ -15,7 +15,4 @@ public partial class Appointment
     public virtual User Doctor { get; set; } = null!;
 
     public virtual Patient Patient { get; set; } = null!;
-
-    //Method
-    public bool IsAppointmentToday() => AppointmentDate.Date == DateTime.Today;
 }

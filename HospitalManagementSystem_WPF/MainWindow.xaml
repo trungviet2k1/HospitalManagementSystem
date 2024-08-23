@@ -9,47 +9,105 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="Hospital Management System - HMY" Height="450" Width="800">
+
     <Grid>
-        <!-- TabControl to the left -->
-        <TabControl>
-            <TabItem Header="Rooms">
-                <!-- Content for Rooms -->
-                <ListView ItemsSource="{Binding Rooms}">
-                    <!-- Define your DataTemplate for Room items here -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0" SelectedIndex="{Binding SelectedTabIndex}">
+            <!-- Tab for Staff with sub-tabs -->
+            <TabItem Header="Staff">
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.UserList}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding UserId}" Width="50"/>
+                            <GridViewColumn Header="Username" DisplayMemberBinding="{Binding Username}" Width="150"/>
+                            <GridViewColumn Header="Full Name" DisplayMemberBinding="{Binding FullName}" Width="200"/>
+                            <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="200"/>
+                            <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding PhoneNumber}" Width="150"/>
+                            <GridViewColumn Header="Role" DisplayMemberBinding="{Binding Role.RoleName}" Width="150"/>
+                            <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}" Width="100"/>
+                        </GridView>
+                    </ListView.View>
                 </ListView>
             </TabItem>
+
+            <!-- Tab for Departments -->
             <TabItem Header="Departments">
-                <!-- Content for Departments -->
-                <ListView ItemsSource="{Binding Departments}">
-                    <!-- Define your DataTemplate for Department items here -->
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.DepartmentList}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding DepartmentId}" Width="200"/>
+                            <GridViewColumn Header="Department Name" DisplayMemberBinding="{Binding DepartmentName}" Width="200"/>
+                            <GridViewColumn Header="Location" DisplayMemberBinding="{Binding Location}" Width="150"/>
+                            <GridViewColumn Header="Dean" DisplayMemberBinding="{Binding DepartmentHeadName}" Width="150"/>
+                        </GridView>
+                    </ListView.View>
                 </ListView>
             </TabItem>
-            <TabItem Header="Doctors">
-                <!-- Content for Doctors -->
-                <ListView ItemsSource="{Binding Doctors}">
-                    <!-- Define your DataTemplate for Doctor items here -->
+
+            <!-- Tab for Rooms -->
+            <TabItem Header="Rooms">
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.RoomList}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Room Number" DisplayMemberBinding="{Binding RoomNumber}" Width="150"/>
+                            <GridViewColumn Header="Department" DisplayMemberBinding="{Binding DepartmentName}" Width="200"/>
+                            <GridViewColumn Header="Availability" DisplayMemberBinding="{Binding AvailabilityStatus}" Width="100"/>
+                        </GridView>
+                    </ListView.View>
                 </ListView>
             </TabItem>
-            <TabItem Header="Medications">
-                <!-- Content for Medications -->
-                <ListView ItemsSource="{Binding Medications}">
-                    <!-- Define your DataTemplate for Medication items here -->
-                </ListView>
-            </TabItem>
+
+            <!-- Tab for Patients -->
             <TabItem Header="Patients">
-                <!-- Content for Patients -->
-                <ListView ItemsSource="{Binding Patients}">
-                    <!-- Define your DataTemplate for Patient items here -->
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.PatientList}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Full Name" DisplayMemberBinding="{Binding FullName}" Width="200"/>
+                            <GridViewColumn Header="Date of Birth" DisplayMemberBinding="{Binding DateOfBirth}" Width="150"/>
+                            <GridViewColumn Header="Phone Number" DisplayMemberBinding="{Binding PhoneNumber}" Width="150"/>
+                            <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}" Width="100"/>
+                        </GridView>
+                    </ListView.View>
                 </ListView>
             </TabItem>
+
+            <!-- Tab for Medications -->
+            <TabItem Header="Medications">
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.MedicationList}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Medication Name" DisplayMemberBinding="{Binding MedicationName}" Width="200"/>
+                            <GridViewColumn Header="Quantity In Stock" DisplayMemberBinding="{Binding QuantityInStock}" Width="150"/>
+                            <GridViewColumn Header="Unit" DisplayMemberBinding="{Binding Unit}" Width="100"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+
+            <!-- Tab for Invoices -->
             <TabItem Header="Invoices">
-                <!-- Content for Invoices -->
-                <ListView ItemsSource="{Binding Invoices}">
-                    <!-- Define your DataTemplate for Invoice items here -->
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.InvoiceList}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Invoice ID" DisplayMemberBinding="{Binding InvoiceID}" Width="150"/>
+                            <GridViewColumn Header="Patient Name" DisplayMemberBinding="{Binding PatientName}" Width="200"/>
+                            <GridViewColumn Header="Total Amount" DisplayMemberBinding="{Binding TotalAmount}" Width="150"/>
+                            <GridViewColumn Header="Date Issued" DisplayMemberBinding="{Binding DateIssued}" Width="150"/>
+                        </GridView>
+                    </ListView.View>
                 </ListView>
             </TabItem>
-            <!-- UserDetails TextBlock to the right -->
-            <TextBlock Text="{Binding UserDetails}" Margin="10" FontSize="16" FontWeight="Bold" Foreground="DarkGreen" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </TabControl>
+
+        <!-- Buttons for Admin actions -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button Content="Add" Width="100" Height="40" Margin="5" Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Edit" Width="100" Height="40" Margin="5" Background="#FFC107" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Delete" Width="100" Height="40" Margin="5" Background="#F44336" Foreground="White" FontWeight="Bold"/>
+        </StackPanel>
     </Grid>
 </Window>

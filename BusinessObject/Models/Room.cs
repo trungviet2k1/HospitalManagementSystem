@@ -12,5 +12,9 @@ public partial class Room
 
     public virtual Department Department { get; set; } = null!;
 
+    public string DepartmentName => Department?.DepartmentName ?? "N/A";
+
+    public string AvailabilityStatus => IsAvailable ? "Còn phòng" : "Hết phòng";
+
     public virtual ICollection<RoomAssignment> RoomAssignments { get; set; } = new List<RoomAssignment>();
 }

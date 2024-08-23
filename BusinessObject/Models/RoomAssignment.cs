@@ -8,9 +8,9 @@ public partial class RoomAssignment
 
     public int PatientId { get; set; }
 
-    public DateTime AssignmentDate { get; set; }
+    public DateOnly AssignmentDate { get; set; }
 
-    public DateTime DischargeDate { get; set; }
+    public DateOnly? DischargeDate { get; set; }
 
     public virtual Patient Patient { get; set; } = null!;
 

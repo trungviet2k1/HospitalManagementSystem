@@ -8,7 +8,7 @@ public partial class Billing
 
     public decimal TotalAmount { get; set; }
 
-    public DateTime DateIssued { get; set; }
+    public DateOnly DateIssued { get; set; }
 
     public virtual Patient Patient { get; set; } = null!;
 }

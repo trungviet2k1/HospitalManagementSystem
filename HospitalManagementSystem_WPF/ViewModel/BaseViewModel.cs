@@ -12,12 +12,24 @@ namespace HospitalManagementSystem_WPF.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = "")
+        {
+            if (!Equals(field, newValue))
+            {
+                field = newValue;
+                OnPropertyChanged(propertyName);
+                return true;
+            }
+
+            return false;
+        }
     }
 
     class RelayCommand : ICommand
     {
-        private readonly Action _execute;
-        private readonly Func<bool>? _canExecute;
+        private Action _execute;
+        private Func<bool>? _canExecute;
 
         public RelayCommand(Action execute, Func<bool>? canExecute = null)
         {
@@ -25,15 +37,31 @@ namespace HospitalManagementSystem_WPF.ViewModel
             _canExecute = canExecute;
         }
 
-        public bool CanExecute(object? parameter)
+        public bool CanExecute(object? parameter) => _canExecute == null || _canExecute();
+
+        public void Execute(object? parameter) => _execute();
+
+        public event EventHandler? CanExecuteChanged
         {
-            return _canExecute?.Invoke() ?? true;
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+    }
+
+    class RelayCommand<T> : ICommand
+    {
+        private Action<T> _execute;
+        private Func<T, bool>? _canExecute;
+
+        public RelayCommand(Action<T> execute, Func<T, bool>? canExecute = null)
+        {
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
         }
 
-        public void Execute(object? parameter)
-        {
-            _execute();
-        }
+        public bool CanExecute(object? parameter) => _canExecute == null || _canExecute((T)parameter!);
+
+        public void Execute(object? parameter) => _execute((T)parameter!);
 
         public event EventHandler? CanExecuteChanged
         {

@@ -6,7 +6,7 @@ public partial class Patient
 
     public string FullName { get; set; } = null!;
 
-    public DateTime DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
     public string? Gender { get; set; }
 
@@ -27,8 +27,4 @@ public partial class Patient
     public virtual ICollection<Prescription> Prescriptions { get; set; } = new List<Prescription>();
 
     public virtual ICollection<RoomAssignment> RoomAssignments { get; set; } = new List<RoomAssignment>();
-
-    //Method
-    public string GetFullName() => $"{FullName}";
-    public int Age => DateTime.Now.Year - DateOfBirth.Year - (DateTime.Now.Date < DateOfBirth.Date ? 1 : 0);
 }

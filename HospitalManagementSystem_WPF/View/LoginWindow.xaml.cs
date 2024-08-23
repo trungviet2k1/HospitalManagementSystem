@@ -1,19 +1,20 @@
 ﻿using HospitalManagementSystem.HospitalManagementSystem_WPF;
 using HospitalManagementSystem_WPF.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
 namespace HospitalManagementSystem_WPF.View
 {
     public partial class LoginWindow : Window
     {
-        private readonly LoginViewModel _viewModel;
+        private LoginViewModel _loginModel;
+        private MainWindow _mainWindow;
 
-        public LoginWindow()
+        public LoginWindow(LoginViewModel viewModel, MainWindow mainWindow)
         {
             InitializeComponent();
-            _viewModel = ServiceLocator.ServiceProvider.GetRequiredService<LoginViewModel>();
-            DataContext = _viewModel;
+            _loginModel = viewModel;
+            _mainWindow = mainWindow;
+            DataContext = _loginModel;
         }
 
         private async void LoginButton_Click(object sender, RoutedEventArgs e)
@@ -21,12 +22,11 @@ namespace HospitalManagementSystem_WPF.View
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
 
-            bool loginSuccessful = await _viewModel.LoginAsync(username, password);
+            bool loginSuccessful = await _loginModel.LoginAsync(username, password);
 
             if (loginSuccessful)
             {
-                var mainWindow = ServiceLocator.ServiceProvider.GetRequiredService<MainWindow>();
-                mainWindow.Show();
+                _mainWindow.Show();
                 Close();
             }
             else

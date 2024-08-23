@@ -34,9 +34,7 @@ public partial class User
 
     // Methods
     public string GetUserDetails() => $"{FullName} ({Username})";
-
     public bool VerifyPassword(string password) => PasswordHash == HashPassword(password);
-
     private string HashPassword(string password)
     {
         return password;

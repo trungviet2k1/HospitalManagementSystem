@@ -8,7 +8,7 @@ public partial class Prescription
 
     public int DoctorId { get; set; }
 
-    public DateTime DateIssued { get; set; }
+    public DateOnly DateIssued { get; set; }
 
     public virtual User Doctor { get; set; } = null!;
 
