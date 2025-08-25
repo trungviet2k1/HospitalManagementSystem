@@ -46,6 +46,8 @@ namespace DataAccess.DAO
 
         public async Task UpdateUserAsync(User user)
         {
+            var role = await _context.Roles.FindAsync(user.RoleId);
+            user.Role = role; // EF sẽ track đúng instance
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
