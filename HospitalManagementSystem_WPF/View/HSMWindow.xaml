@@ -65,7 +65,9 @@
 
             <!-- Tab for Departments -->
             <TabItem Header="Departments" Visibility="{Binding DepartmentTabVisibility}">
-                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.DepartmentList, FallbackValue={x:Null}}">
+                <ListView Margin="10" 
+                          ItemsSource="{Binding CurrentViewModel.DepartmentList, FallbackValue={x:Null}}"
+                          SelectedItem="{Binding CurrentViewModel.SelectedDepartment, Mode=TwoWay}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="ID" DisplayMemberBinding="{Binding DepartmentId}" Width="50"/>

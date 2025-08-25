@@ -1,8 +1,6 @@
 ﻿using BusinessObject.Models;
 using DataAccess.Repositories.IRepository;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace HospitalManagementSystem_WPF.ViewModel
@@ -10,6 +8,8 @@ namespace HospitalManagementSystem_WPF.ViewModel
     public class DepartmentViewModel : BaseViewModel, ICrudOperations
     {
         private readonly IDepartmentRepository _departmentRepository;
+        private readonly IUserRepository _userRepository;
+
         private ObservableCollection<Department>? _departmentList;
         private Department? _selectedDepartment;
 
@@ -25,41 +25,45 @@ namespace HospitalManagementSystem_WPF.ViewModel
             set => SetProperty(ref _selectedDepartment, value);
         }
 
-        public DepartmentViewModel(IDepartmentRepository departmentRepository)
+        public DepartmentViewModel(IDepartmentRepository departmentRepository, IUserRepository userRepository)
         {
             _departmentRepository = departmentRepository;
+            _userRepository = userRepository;
+
             LoadDepartmentsAsync();
         }
 
         public async void LoadDepartmentsAsync()
         {
             var departments = await _departmentRepository.GetAllDepartmentsAsync();
-            DepartmentList = new ObservableCollection<Department>(departments);
+            DepartmentList = [.. departments];
         }
 
-        // ===================== Add =====================
         public async void Add()
         {
             var newDept = new Department();
+            var allUsers = new ObservableCollection<User>(await _userRepository.GetAllUsersAsync());
 
-            // Mở dialog nhập thông tin Department
-            var dialog = new DepartmentDialogWindow(newDept)
+            var dialog = new View.DepartmentDialogWindow(newDept, allUsers)
             {
                 Owner = Application.Current.MainWindow
             };
 
             if (dialog.ShowDialog() == true)
             {
+                // Cập nhật DepartmentHeadId nếu có
+                if (newDept.DepartmentHead != null)
+                    newDept.DepartmentHeadId = newDept.DepartmentHead.UserId;
+
                 // Thêm vào database
                 await _departmentRepository.AddDepartmentAsync(newDept);
 
-                // Thêm vào ObservableCollection
+                // Cập nhật ObservableCollection
                 DepartmentList?.Add(newDept);
                 SelectedDepartment = newDept;
             }
         }
 
-        // ===================== Edit =====================
         public async void Edit()
         {
             if (SelectedDepartment == null)
@@ -68,24 +72,31 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 return;
             }
 
-            var dialog = new DepartmentDialogWindow(SelectedDepartment)
+            var allUsers = new ObservableCollection<User>(await _userRepository.GetAllUsersAsync());
+
+            var dialog = new View.DepartmentDialogWindow(SelectedDepartment, allUsers)
             {
                 Owner = Application.Current.MainWindow
             };
 
             if (dialog.ShowDialog() == true)
             {
+                // Cập nhật DepartmentHeadId nếu có
+                if (SelectedDepartment.DepartmentHead != null)
+                    SelectedDepartment.DepartmentHeadId = SelectedDepartment.DepartmentHead.UserId;
+                else
+                    SelectedDepartment.DepartmentHeadId = null;
+
                 // Cập nhật database
                 await _departmentRepository.UpdateDepartmentAsync(SelectedDepartment);
 
-                // Cập nhật ObservableCollection
+                // Refresh ObservableCollection
                 var index = DepartmentList?.IndexOf(SelectedDepartment) ?? -1;
                 if (index >= 0 && DepartmentList != null)
                     DepartmentList[index] = SelectedDepartment;
             }
         }
 
-        // ===================== Delete =====================
         public async void Delete()
         {
             if (SelectedDepartment == null)
