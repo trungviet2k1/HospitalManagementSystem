@@ -1,0 +1,140 @@
+﻿<Window x:Class="HospitalManagementSystem_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HospitalManagementSystem_WPF"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Hospital Management System - HMY" Height="450" Width="800">
+
+    <Window.Resources>
+        <!-- Converter dùng lại ở nhiều nơi -->
+        <local:BooleanToStatusConverter x:Key="BooleanToStatusConverter"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0" SelectedIndex="{Binding SelectedTabIndex}">
+            <!-- Tab for Staff -->
+            <TabItem Header="Staff" Visibility="{Binding StaffTabVisibility}">
+                <ListView Margin="10" 
+                          ItemsSource="{Binding CurrentViewModel.StaffList, FallbackValue={x:Null}}"
+                          SelectedItem="{Binding CurrentViewModel.SelectedStaff}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding UserId}" Width="50"/>
+                            <GridViewColumn Header="Username" DisplayMemberBinding="{Binding Username}" Width="150"/>
+                            <GridViewColumn Header="Full Name" DisplayMemberBinding="{Binding FullName}" Width="200"/>
+                            <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="200"/>
+                            <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding PhoneNumber}" Width="150"/>
+                            <GridViewColumn Header="Role" DisplayMemberBinding="{Binding Role.RoleName}" Width="150"/>
+
+                            <!-- Dùng Converter thay vì raw bool -->
+                            <GridViewColumn Header="Status" Width="100">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Status, Converter={StaticResource BooleanToStatusConverter}, ConverterParameter=User}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+
+            <!-- Tab for Departments -->
+            <TabItem Header="Departments" Visibility="{Binding DepartmentTabVisibility}">
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.DepartmentList, FallbackValue={x:Null}}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding DepartmentId}" Width="50"/>
+                            <GridViewColumn Header="Department Name" DisplayMemberBinding="{Binding DepartmentName}" Width="200"/>
+                            <GridViewColumn Header="Location" DisplayMemberBinding="{Binding Location}" Width="150"/>
+                            <GridViewColumn Header="Head" DisplayMemberBinding="{Binding DepartmentHead.FullName}" Width="150"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+
+            <!-- Tab for Rooms -->
+            <TabItem Header="Rooms" Visibility="{Binding RoomTabVisibility}">
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.RoomList, FallbackValue={x:Null}}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Room Number" DisplayMemberBinding="{Binding RoomNumber}" Width="100"/>
+                            <GridViewColumn Header="Department" DisplayMemberBinding="{Binding Department.DepartmentName}" Width="200"/>
+
+                            <!-- Availability hiển thị bằng Converter -->
+                            <GridViewColumn Header="Availability" Width="100">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding IsAvailable, Converter={StaticResource BooleanToStatusConverter}, ConverterParameter=Room}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+
+            <!-- Tab for Patients -->
+            <TabItem Header="Patients" Visibility="{Binding PatientTabVisibility}">
+                <ListView Margin="10" ItemsSource="{Binding CurrentViewModel.PatientList, FallbackValue={x:Null}}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Full Name" DisplayMemberBinding="{Binding FullName}" Width="200"/>
+                            <GridViewColumn Header="Date of Birth" DisplayMemberBinding="{Binding DateOfBirth, StringFormat=d}" Width="100"/>
+                            <GridViewColumn Header="Gender" DisplayMemberBinding="{Binding Gender}" Width="80"/>
+                            <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding PhoneNumber}" Width="120"/>
+
+                            <!-- Status bệnh nhân hiển thị bằng Converter -->
+                            <GridViewColumn Header="Status" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Status, Converter={StaticResource BooleanToStatusConverter}, ConverterParameter=Patient}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+
+            <!-- Tab for Medications -->
+            <TabItem Header="Medications" Visibility="{Binding MedicationTabVisibility}">
+                <TextBlock Text="Medication data will be displayed here" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </TabItem>
+
+            <!-- Tab for Invoices -->
+            <TabItem Header="Invoices" Visibility="{Binding InvoiceTabVisibility}">
+                <TextBlock Text="Invoice data will be displayed here" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </TabItem>
+
+            <!-- Tab for Logout -->
+            <TabItem>
+                <TabItem.Header>
+                    <Button Content="Logout" Command="{Binding LogoutCommand}"
+                            Background="Transparent" BorderThickness="0"/>
+                </TabItem.Header>
+            </TabItem>
+        </TabControl>
+
+        <!-- Buttons for Admin actions -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button Content="Add" Width="100" Height="40" Margin="5" Background="#4CAF50" 
+                    Foreground="White" FontWeight="Bold" Command="{Binding AddCommand}" 
+                    Visibility="{Binding AddButtonVisibility}"/>
+            <Button Content="Edit" Width="100" Height="40" Margin="5" Background="#FFC107" 
+                    Foreground="White" FontWeight="Bold" Command="{Binding EditCommand}" 
+                    Visibility="{Binding EditButtonVisibility}"/>
+            <Button Content="Delete" Width="100" Height="40" Margin="5" Background="#F44336" 
+                    Foreground="White" FontWeight="Bold" Command="{Binding DeleteCommand}" 
+                    Visibility="{Binding DeleteButtonVisibility}"/>
+        </StackPanel>
+    </Grid>
+</Window>
