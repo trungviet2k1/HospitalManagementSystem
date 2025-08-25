@@ -4,14 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.DAO
 {
-    public class RoomDAO
+    public class RoomDAO(HospitalManagementDbContext context)
     {
-        private readonly HospitalManagementDbContext _context;
-
-        public RoomDAO(HospitalManagementDbContext context)
-        {
-            _context = context;
-        }
+        private readonly HospitalManagementDbContext _context = context;
 
         public async Task<IEnumerable<Room>> GetAllRoomsAsync()
         {

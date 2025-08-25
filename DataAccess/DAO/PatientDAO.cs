@@ -4,14 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.DAO
 {
-    public class PatientDAO
+    public class PatientDAO(HospitalManagementDbContext context)
     {
-        private readonly HospitalManagementDbContext _context;
-
-        public PatientDAO(HospitalManagementDbContext context)
-        {
-            _context = context;
-        }
+        private readonly HospitalManagementDbContext _context = context;
 
         public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
         {

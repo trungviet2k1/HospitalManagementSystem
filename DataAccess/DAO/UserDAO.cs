@@ -4,14 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.DAO
 {
-    public class UserDAO
+    public class UserDAO(HospitalManagementDbContext context)
     {
-        private readonly HospitalManagementDbContext _context;
-
-        public UserDAO(HospitalManagementDbContext context)
-        {
-            _context = context;
-        }
+        private readonly HospitalManagementDbContext _context = context;
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
@@ -27,6 +22,15 @@ namespace DataAccess.DAO
         public async Task<User> GetUserByUsernameAsync(string username)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return user ?? new User();
+        }
+
+        public async Task<User> GetUserWithRoleAsync(string username)
+        {
+            var user = await _context.Users.Include(u => u.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+                    .FirstOrDefaultAsync(u => u.Username == username);
             return user ?? new User();
         }
 

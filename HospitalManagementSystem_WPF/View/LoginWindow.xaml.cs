@@ -1,4 +1,4 @@
-﻿using HospitalManagementSystem.HospitalManagementSystem_WPF;
+﻿using BusinessObject.Models;
 using HospitalManagementSystem_WPF.ViewModel;
 using System.Windows;
 
@@ -6,14 +6,16 @@ namespace HospitalManagementSystem_WPF.View
 {
     public partial class LoginWindow : Window
     {
-        private LoginViewModel _loginModel;
-        private MainWindow _mainWindow;
+        public User? LoggedInUser { get; private set; }
 
-        public LoginWindow(LoginViewModel viewModel, MainWindow mainWindow)
+        private readonly LoginViewModel _loginModel;
+        private readonly MainViewModel _mainViewModel;
+
+        public LoginWindow(LoginViewModel viewModel, MainViewModel mainViewModel)
         {
             InitializeComponent();
             _loginModel = viewModel;
-            _mainWindow = mainWindow;
+            _mainViewModel = mainViewModel;
             DataContext = _loginModel;
         }
 
@@ -22,11 +24,19 @@ namespace HospitalManagementSystem_WPF.View
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
 
-            bool loginSuccessful = await _loginModel.LoginAsync(username, password);
-
-            if (loginSuccessful)
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                _mainWindow.Show();
+                MessageBox.Show("Please enter both username and password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var user = await _loginModel.LoginAsync(username, password);
+
+            if (user != null)
+            {
+                LoggedInUser = user;
+                _mainViewModel.SetRole(user.Role);
+                DialogResult = true;
                 Close();
             }
             else

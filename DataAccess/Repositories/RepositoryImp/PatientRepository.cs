@@ -4,35 +4,31 @@ using DataAccess.Repositories.IRepository;
 
 namespace DataAccess.Repositories.RepositoryImp
 {
-    public class PatientRepository : IPatientRepository
+    public class PatientRepository(PatientDAO patientDAO) : IPatientRepository
     {
-        private readonly PatientDAO _patientDAO;
-
-        public PatientRepository(PatientDAO patientDAO) => _patientDAO = patientDAO;
-
         public Task<IEnumerable<Patient>> GetAllPatientsAsync()
         {
-            return _patientDAO.GetAllPatientsAsync();
+            return patientDAO.GetAllPatientsAsync();
         }
 
         public Task<Patient> GetPatientByIdAsync(int patientId)
         {
-            return _patientDAO.GetPatientByIdAsync(patientId);
+            return patientDAO.GetPatientByIdAsync(patientId);
         }
 
         public Task AddPatientAsync(Patient patient)
         {
-            return _patientDAO.AddPatientAsync(patient);
+            return patientDAO.AddPatientAsync(patient);
         }
 
         public Task UpdatePatientAsync(Patient patient)
         {
-            return _patientDAO.UpdatePatientAsync(patient);
+            return patientDAO.UpdatePatientAsync(patient);
         }
 
         public Task DeletePatientAsync(int patientId)
         {
-            return _patientDAO.DeletePatientAsync(patientId);
+            return patientDAO.DeletePatientAsync(patientId);
         }
     }
 }

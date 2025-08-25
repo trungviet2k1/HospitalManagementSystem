@@ -7,6 +7,7 @@ namespace DataAccess.Repositories.IRepository
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User> GetUserByIdAsync(int userId);
         Task<User> GetUserByUsernameAsync(string username);
+        Task<User> GetUserWithRoleAsync(string username); // New method to get user with role and permissions
         Task AddUserAsync(User user);
         Task UpdateUserAsync(User user);
         Task DeleteUserAsync(int userId);

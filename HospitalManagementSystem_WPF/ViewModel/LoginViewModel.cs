@@ -1,24 +1,21 @@
-﻿using DataAccess.Repositories.IRepository;
+﻿using BusinessObject.Models;
+using DataAccess.Repositories.IRepository;
 
 namespace HospitalManagementSystem_WPF.ViewModel
 {
-    public class LoginViewModel : BaseViewModel
+    public class LoginViewModel(IUserRepository userRepository) : BaseViewModel
     {
-        private IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository = userRepository;
 
-        public LoginViewModel(IUserRepository userRepository)
+        public async Task<User?> LoginAsync(string username, string password)
         {
-            _userRepository = userRepository;
-        }
+            var user = await _userRepository.GetUserWithRoleAsync(username);
 
-        public async Task<bool> LoginAsync(string username, string password)
-        {
-            var user = await _userRepository.GetUserByUsernameAsync(username);
             if (user != null && user.VerifyPassword(password))
             {
-                return true;
+                return user; // user có đầy đủ Role, RolePermissions
             }
-            return false;
+            return null;
         }
     }
 }

@@ -7,37 +7,67 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using DataAccess.DBContext;
 using HospitalManagementSystem_WPF.View;
+using HospitalManagementSystem_WPF;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace HospitalManagementSystem.HospitalManagementSystem_WPF
 {
     public partial class App : Application
     {
         public static IServiceProvider? ServiceProvider { get; private set; }
+        public static IConfiguration? Configuration { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Cấu hình ServiceProvider
+            // 1) Load config
+            var builder = new ConfigurationManager();
+            builder.SetBasePath(Directory.GetCurrentDirectory())
+                   .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            Configuration = builder;
+
+            // 2) Build DI
             var services = new ServiceCollection();
             ConfigureServices(services);
             ServiceProvider = services.BuildServiceProvider();
 
-            // Khởi tạo LoginWindow và hiển thị
-            var loginWindow = ServiceProvider.GetRequiredService<LoginWindow>();
-            loginWindow.ShowDialog();
+            // 3) RẤT QUAN TRỌNG: chặn WPF auto-shutdown khi login window đóng
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-            // Khởi tạo MainWindow và hiển thị sau khi đăng nhập thành công
-            var mainWindow = new MainWindow
+            // 4) Show login dialog
+            var loginWindow = ServiceProvider.GetRequiredService<LoginWindow>();
+            var loginResult = loginWindow.ShowDialog();
+
+            if (loginResult == true && loginWindow.LoggedInUser != null)
             {
-                DataContext = ServiceProvider.GetRequiredService<MainViewModel>()
-            };
-            mainWindow.Show();
+                // 5) Tạo và mở MainWindow
+                var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+
+                // Set role vào MainViewModel (đã được set làm DataContext trong MainWindow)
+                if (mainWindow.DataContext is MainViewModel mainVM)
+                {
+                    mainVM.SetRole(loginWindow.LoggedInUser.Role);
+                }
+
+                // Đặt MainWindow CHÍNH THỨC rồi mới Show
+                MainWindow = mainWindow;
+                MainWindow.Show();
+
+                // 6) Cho phép WPF tự tắt khi MainWindow đóng
+                ShutdownMode = ShutdownMode.OnMainWindowClose;
+            }
+            else
+            {
+                // Login fail/cancel
+                Shutdown();
+            }
 
             base.OnStartup(e);
         }
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            // Đăng ký ViewModel
+            // ViewModels
             services.AddSingleton<MainViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<StaffViewModel>();
@@ -50,27 +80,28 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<MedicationViewModel>();
             services.AddTransient<InvoiceViewModel>();
 
-            // Đăng ký View
+            // Views
             services.AddSingleton<MainWindow>();
             services.AddTransient<LoginWindow>();
 
-            // Đăng ký các DAO
+            // DAOs
             services.AddTransient<AppointmentDAO>();
             services.AddTransient<DepartmentDAO>();
             services.AddTransient<PatientDAO>();
             services.AddTransient<RoomDAO>();
             services.AddTransient<UserDAO>();
 
-            // Đăng ký các Repository
+            // Repos
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             services.AddScoped<IPatientRepository, PatientRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
-            // Đăng ký DbContext
+            // DbContext
+            var connectionString = Configuration!.GetConnectionString("DBContext");
             services.AddDbContext<HospitalManagementDbContext>(options =>
-                options.UseSqlServer("Server=(local); uid=sa; pwd=123; database=HospitalManagementDB; TrustServerCertificate=True;"));
+                options.UseSqlServer(connectionString));
         }
     }
 }

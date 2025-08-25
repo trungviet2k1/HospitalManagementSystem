@@ -4,14 +4,9 @@ using DataAccess.Repositories.IRepository;
 
 namespace DataAccess.Repositories.RepositoryImp
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository(UserDAO userDAO) : IUserRepository
     {
-        private readonly UserDAO _userDAO;
-
-        public UserRepository(UserDAO userDAO)
-        {
-            _userDAO = userDAO;
-        }
+        private readonly UserDAO _userDAO = userDAO;
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
@@ -26,6 +21,11 @@ namespace DataAccess.Repositories.RepositoryImp
         public async Task<User> GetUserByUsernameAsync(string username)
         {
             return await _userDAO.GetUserByUsernameAsync(username);
+        }
+
+        public async Task<User> GetUserWithRoleAsync(string username)
+        {
+            return await _userDAO.GetUserWithRoleAsync(username);
         }
 
         public async Task AddUserAsync(User user)

@@ -4,11 +4,9 @@ using DataAccess.Repositories.IRepository;
 
 namespace DataAccess.Repositories.RepositoryImp
 {
-    public class AppointmentRepository : IAppointmentRepository
+    public class AppointmentRepository(AppointmentDAO appointmentDAO) : IAppointmentRepository
     {
-        private readonly AppointmentDAO _appointmentDAO;
-
-        public AppointmentRepository(AppointmentDAO appointmentDAO) => _appointmentDAO = appointmentDAO;
+        private readonly AppointmentDAO _appointmentDAO = appointmentDAO;
 
         public Task<IEnumerable<Appointment>> GetAllAppointmentsAsync()
         {

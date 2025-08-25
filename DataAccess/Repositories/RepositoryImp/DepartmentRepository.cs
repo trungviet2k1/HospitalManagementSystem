@@ -4,11 +4,9 @@ using DataAccess.Repositories.IRepository;
 
 namespace DataAccess.Repositories.RepositoryImp
 {
-    public class DepartmentRepository : IDepartmentRepository
+    public class DepartmentRepository(DepartmentDAO departmentDAO) : IDepartmentRepository
     {
-        private readonly DepartmentDAO _departmentDAO;
-
-        public DepartmentRepository(DepartmentDAO departmentDAO) => _departmentDAO = departmentDAO;
+        private readonly DepartmentDAO _departmentDAO = departmentDAO;
 
         public Task<IEnumerable<Department>> GetAllDepartmentsAsync()
         {
