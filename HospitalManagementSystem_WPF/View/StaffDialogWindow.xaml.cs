@@ -6,36 +6,56 @@ namespace HospitalManagementSystem_WPF.View
 {
     public partial class StaffDialogWindow : Window
     {
-        public User Staff { get; private set; }
-
+        public User User { get; private set; }
         public ObservableCollection<Role> Roles { get; set; } = [];
-
-        // SelectedRole dùng cho ComboBox binding
         public Role? SelectedRole { get; set; }
+        public ObservableCollection<Department> Departments { get; set; } = [];
+        public Department? SelectedDepartment { get; set; }
 
-        public StaffDialogWindow(User staff, ObservableCollection<Role> roles)
+        public StaffDialogWindow(User user, ObservableCollection<Role> roles, ObservableCollection<Department> departments)
         {
             InitializeComponent();
-            Staff = staff;
-            Roles = roles;
+            User = user;
+            Roles = roles ?? [];
+            Departments = departments ?? [];
 
-            // Gán SelectedRole từ collection Roles để ComboBox hiển thị đúng
-            SelectedRole = Roles?.FirstOrDefault(r => r.RoleId == staff.RoleId);
+            SelectedRole = Roles.FirstOrDefault(r => r.RoleId == user.RoleId);
+
+            // Lấy Department từ User.Staff nếu có
+            if (user.Staff.Count > 0)
+                SelectedDepartment = user.Staff.First().Department;
+            else
+                SelectedDepartment = Departments.FirstOrDefault(); // fallback
 
             DataContext = this;
-            PasswordBox.Password = staff.PasswordHash;
+            PasswordBox.Password = user.PasswordHash;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            // Cập nhật mật khẩu
-            Staff.PasswordHash = PasswordBox.Password;
+            User.PasswordHash = PasswordBox.Password;
 
-            // Cập nhật Role nếu chọn
             if (SelectedRole != null)
             {
-                Staff.Role = SelectedRole;
-                Staff.RoleId = SelectedRole.RoleId;
+                User.Role = SelectedRole;
+                User.RoleId = SelectedRole.RoleId;
+            }
+
+            if (SelectedDepartment != null)
+            {
+                Staff staff;
+                if (User.Staff.Count == 0)
+                {
+                    staff = new Staff { User = User, UserId = User.UserId };
+                    User.Staff.Add(staff);
+                }
+                else
+                {
+                    staff = User.Staff.First();
+                }
+
+                staff.Department = SelectedDepartment;
+                staff.DepartmentId = SelectedDepartment.DepartmentId;
             }
 
             DialogResult = true;

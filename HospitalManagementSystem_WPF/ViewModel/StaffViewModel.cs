@@ -1,8 +1,6 @@
 ﻿using BusinessObject.Models;
 using DataAccess.Repositories.IRepository;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using HospitalManagementSystem_WPF.View;
 
@@ -12,8 +10,10 @@ namespace HospitalManagementSystem_WPF.ViewModel
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly IDepartmentRepository _departmentRepository;
         private ObservableCollection<User>? _staffList;
         private ObservableCollection<Role>? _roles;
+        private ObservableCollection<Department>? _departments;
         private User? _selectedStaff;
         private Role? _role;
 
@@ -31,6 +31,12 @@ namespace HospitalManagementSystem_WPF.ViewModel
             set => SetProperty(ref _roles, value);
         }
 
+        public ObservableCollection<Department>? Departments
+        {
+            get => _departments;
+            set => SetProperty(ref _departments, value);
+        }
+
         public User? SelectedStaff
         {
             get => _selectedStaff;
@@ -44,39 +50,73 @@ namespace HospitalManagementSystem_WPF.ViewModel
         }
 
         // Constructor nhận CurrentUser từ MainViewModel (hoặc gán sau)
-        public StaffViewModel(IUserRepository userRepository, IRoleRepository roleRepository, User? currentUser = null)
+        public StaffViewModel(IUserRepository userRepository, IRoleRepository roleRepository, IDepartmentRepository departmentRepository, User? currentUser = null)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
+            _departmentRepository = departmentRepository;
             CurrentUser = currentUser;
 
             LoadStaffsAsync();
-            LoadRolesAsync();
+            _ = LoadRolesAsync();
         }
 
         public async void LoadStaffsAsync()
         {
-            var staffs = await _userRepository.GetAllUsersAsync();
-            StaffList = new ObservableCollection<User>(staffs);
+            var staffs = await _userRepository.GetAllUsersWithDepartmentAsync();
+            StaffList = [.. staffs];
         }
 
-        public async void LoadRolesAsync()
+        public async Task LoadRolesAsync()
         {
             var roles = await _roleRepository.GetAllRolesAsync();
-            Roles = new ObservableCollection<Role>(roles);
+            Roles = [.. roles];
+        }
+
+        public async Task LoadDepartmentsAsync()
+        {
+            var depts = await _departmentRepository.GetAllDepartmentsAsync();
+            Departments = [.. depts];
         }
 
         public async void Add()
         {
-            var staff = new User();
-            staff.RoleId = Roles?.FirstOrDefault()?.RoleId ?? 0;
+            // 1. Load Roles & Departments trước khi mở dialog
+            await LoadRolesAsync();
+            await LoadDepartmentsAsync();
 
-            var dialog = new StaffDialogWindow(staff, Roles) { Owner = Application.Current.MainWindow };
+            // 2. Tạo User mới với Role mặc định
+            var user = new User
+            {
+                RoleId = Roles?.FirstOrDefault()?.RoleId ?? 0
+            };
+
+            // 3. Tạo Staff mặc định liên kết Department
+            var staff = new Staff
+            {
+                DepartmentId = Departments?.FirstOrDefault()?.DepartmentId ?? 0,
+                Department = Departments?.FirstOrDefault() ?? null!,
+                User = user,
+                UserId = user.UserId
+            };
+            user.Staff.Add(staff);
+
+            // 4. Mở dialog
+            var dialog = new StaffDialogWindow(
+                user,
+                Roles ?? [],
+                Departments ?? []
+            )
+            {
+                Owner = Application.Current.MainWindow
+            };
+
             if (dialog.ShowDialog() == true)
             {
-                await _userRepository.AddUserAsync(staff);
-                StaffList?.Add(staff);
-                SelectedStaff = staff;
+                // 5. Thêm User vào database và cập nhật StaffList
+                await _userRepository.AddUserAsync(user);
+                StaffList?.Add(user);
+                SelectedStaff = user;
             }
         }
 
@@ -88,26 +128,39 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 return;
             }
 
+            // 1. Load Roles & Departments trước khi mở dialog
+            await LoadRolesAsync();
+            await LoadDepartmentsAsync();
+
+            // 2. Cập nhật RoleId nếu Role != null
             if (SelectedStaff.Role != null)
                 SelectedStaff.RoleId = SelectedStaff.Role.RoleId;
 
-            var dialog = new StaffDialogWindow(SelectedStaff, Roles) { Owner = Application.Current.MainWindow };
+            // 3. Mở dialog
+            var dialog = new StaffDialogWindow(
+                SelectedStaff,
+                Roles ?? [],
+                Departments ?? []
+            )
+            {
+                Owner = Application.Current.MainWindow
+            };
+
             if (dialog.ShowDialog() == true)
             {
+                // 4. Cập nhật User trong database
                 await _userRepository.UpdateUserAsync(SelectedStaff);
 
-                // Cập nhật ObservableCollection
+                // 5. Cập nhật ObservableCollection
                 var index = StaffList?.IndexOf(SelectedStaff) ?? -1;
                 if (index >= 0 && StaffList != null)
                     StaffList[index] = SelectedStaff;
 
-                // Cập nhật MainViewModel
+                // 6. Cập nhật MainViewModel nếu CurrentUser bị sửa
                 if (Application.Current.MainWindow?.DataContext is MainViewModel mainVM)
                 {
-                    // Update role nếu edit chính CurrentUser
                     mainVM.UpdateCurrentUserIfEdited(SelectedStaff);
 
-                    // Luôn refresh UI StaffList nếu admin edit user khác
                     if (mainVM.CurrentViewModel is StaffViewModel staffVM)
                     {
                         var idx = staffVM.StaffList?.IndexOf(SelectedStaff) ?? -1;

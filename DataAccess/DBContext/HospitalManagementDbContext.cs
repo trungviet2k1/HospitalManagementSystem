@@ -294,12 +294,12 @@ public partial class HospitalManagementDbContext : DbContext
 
             entity.HasOne(d => d.Department).WithMany(p => p.Staff)
                 .HasForeignKey(d => d.DepartmentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK__Staff__Departmen__7A672E12");
 
             entity.HasOne(d => d.User).WithMany(p => p.Staff)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Staff__UserID__7B5B524B");
         });
 

@@ -38,6 +38,7 @@ namespace BusinessObject.Models
 
         // Methods
         public string GetUserDetails() => $"{FullName} ({Username})";
+        public string DepartmentName => Staff.FirstOrDefault()?.Department?.DepartmentName ?? "N/A";
         public bool VerifyPassword(string password) => PasswordHash == HashPassword(password);
         private string HashPassword(string password) => password;
     }

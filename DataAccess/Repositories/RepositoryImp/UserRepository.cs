@@ -13,6 +13,11 @@ namespace DataAccess.Repositories.RepositoryImp
             return await _userDAO.GetAllUsersAsync();
         }
 
+        public async Task<IEnumerable<User>> GetAllUsersWithDepartmentAsync()
+        {
+            return await _userDAO.GetAllUsersWithDepartmentAsync();
+        }
+
         public async Task<User> GetUserByIdAsync(int userId)
         {
             return await _userDAO.GetUserByIdAsync(userId);

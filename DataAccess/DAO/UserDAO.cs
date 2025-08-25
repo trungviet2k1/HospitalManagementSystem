@@ -17,6 +17,15 @@ namespace DataAccess.DAO
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<User>> GetAllUsersWithDepartmentAsync()
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .Include(u => u.Staff)
+                    .ThenInclude(s => s.Department)
+                .ToListAsync();
+        }
+
         public async Task<User> GetUserByIdAsync(int userId)
         {
             var user = await _context.Users.FindAsync(userId);

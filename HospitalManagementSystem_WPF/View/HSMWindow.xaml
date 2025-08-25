@@ -42,6 +42,13 @@
                             <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="200"/>
                             <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding PhoneNumber}" Width="150"/>
                             <GridViewColumn Header="Role" DisplayMemberBinding="{Binding Role.RoleName}" Width="150"/>
+                            <GridViewColumn Header="Working department" Width="150">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DepartmentName}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
                             <!-- Dùng Converter thay vì raw bool -->
                             <GridViewColumn Header="Status" Width="100">

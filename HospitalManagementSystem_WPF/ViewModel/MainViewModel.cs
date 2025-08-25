@@ -273,10 +273,28 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
         public void UpdateCurrentUserIfEdited(User editedUser)
         {
-            if (CurrentUser != null && editedUser.UserId == CurrentUser.UserId)
+            if (CurrentUser == null || editedUser == null)
+                return;
+
+            if (editedUser.UserId != CurrentUser.UserId)
+                return;
+
+            // Cập nhật thông tin user
+            CurrentUser = editedUser;
+            OnPropertyChanged(nameof(CurrentUser));
+
+            try
             {
-                // Update role ngay lập tức
-                SetRole(editedUser.Role, editedUser);
+                // Chỉ gọi SetRole nếu Role hợp lệ và có permissions
+                if (editedUser.Role != null && editedUser.Role.RolePermissions != null)
+                {
+                    SetRole(editedUser.Role, editedUser);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ghi log nếu cần, tránh crash UI
+                System.Diagnostics.Debug.WriteLine($"UpdateCurrentUserIfEdited warning: {ex.Message}");
             }
         }
 
