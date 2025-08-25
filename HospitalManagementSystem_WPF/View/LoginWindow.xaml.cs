@@ -46,7 +46,7 @@ namespace HospitalManagementSystem_WPF.View
 
             // Đăng nhập thành công
             LoggedInUser = user;
-            _mainViewModel.SetRole(user.Role);
+            _mainViewModel.SetRole(user.Role, user);
             DialogResult = true;
             Close();
         }

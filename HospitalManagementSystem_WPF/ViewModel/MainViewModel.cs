@@ -165,7 +165,10 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
         public void SetRole(Role role, User? user = null)
         {
-            CurrentUser = user;
+            if (user != null)
+                CurrentUser = user;
+
+            OnPropertyChanged(nameof(CurrentUser));
 
             StaffTabVisibility = Visibility.Collapsed;
             DepartmentTabVisibility = Visibility.Collapsed;
@@ -291,7 +294,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 {
                     // Reset role cho MainWindow cũ
                     var mainVM = (MainViewModel)mainWindow.DataContext;
-                    mainVM.SetRole(loginWindow.LoggedInUser.Role);
+                    mainVM.SetRole(loginWindow.LoggedInUser.Role, loginWindow.LoggedInUser);
 
                     mainWindow.Show();
                 }

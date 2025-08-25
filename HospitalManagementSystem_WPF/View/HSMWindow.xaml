@@ -11,15 +11,24 @@
     <Window.Resources>
         <!-- Converter dùng lại ở nhiều nơi -->
         <local:BooleanToStatusConverter x:Key="BooleanToStatusConverter"/>
+        <local:UserGreetingConverter x:Key="UserGreetingConverter"/>
     </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TabControl Grid.Row="0" SelectedIndex="{Binding SelectedTabIndex}">
+        <!-- Greeting -->
+        <TextBlock Grid.Row="0" 
+               HorizontalAlignment="Right" VerticalAlignment="Center" 
+               Margin="10"
+               FontWeight="Bold" FontSize="14"
+               Text="{Binding CurrentUser, Converter={StaticResource UserGreetingConverter}}"/>
+
+        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
             <!-- Tab for Staff -->
             <TabItem Header="Staff" Visibility="{Binding StaffTabVisibility}">
                 <ListView Margin="10" 
@@ -125,7 +134,7 @@
         </TabControl>
 
         <!-- Buttons for Admin actions -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
             <Button Content="Add" Width="100" Height="40" Margin="5" Background="#4CAF50" 
                     Foreground="White" FontWeight="Bold" Command="{Binding AddCommand}" 
                     Visibility="{Binding AddButtonVisibility}"/>
