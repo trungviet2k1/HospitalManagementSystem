@@ -118,7 +118,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
             }
         }
 
-        public void Delete()
+        public async void Delete()
         {
             if (SelectedStaff == null)
             {
@@ -130,7 +130,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
                                          "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                _userRepository.DeleteUserAsync(SelectedStaff.UserId).Wait();
+                await _userRepository.DeleteUserAsync(SelectedStaff.UserId);
                 StaffList?.Remove(SelectedStaff);
                 SelectedStaff = null;
             }

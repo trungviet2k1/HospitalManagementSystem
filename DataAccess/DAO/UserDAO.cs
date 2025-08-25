@@ -40,6 +40,8 @@ namespace DataAccess.DAO
 
         public async Task AddUserAsync(User user)
         {
+            var role = await _context.Roles.FindAsync(user.RoleId);
+            user.Role = role;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
