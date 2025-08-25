@@ -10,6 +10,7 @@ using HospitalManagementSystem_WPF.View;
 using HospitalManagementSystem_WPF;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using DataAccess.Repositories;
 
 namespace HospitalManagementSystem.HospitalManagementSystem_WPF
 {
@@ -83,6 +84,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             // Views
             services.AddSingleton<MainWindow>();
             services.AddTransient<LoginWindow>();
+            services.AddTransient<StaffDialogWindow>();
 
             // DAOs
             services.AddTransient<AppointmentDAO>();
@@ -90,6 +92,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<PatientDAO>();
             services.AddTransient<RoomDAO>();
             services.AddTransient<UserDAO>();
+            services.AddTransient<RoleDAO>();
 
             // Repos
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
@@ -97,6 +100,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddScoped<IPatientRepository, PatientRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
 
             // DbContext
             var connectionString = Configuration!.GetConnectionString("DBContext");

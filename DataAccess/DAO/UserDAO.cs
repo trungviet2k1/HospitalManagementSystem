@@ -10,7 +10,11 @@ namespace DataAccess.DAO
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users
+                .Include(u => u.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+                .ToListAsync();
         }
 
         public async Task<User> GetUserByIdAsync(int userId)
@@ -25,13 +29,13 @@ namespace DataAccess.DAO
             return user ?? new User();
         }
 
-        public async Task<User> GetUserWithRoleAsync(string username)
+        public async Task<User?> GetUserWithRoleAsync(string username)
         {
-            var user = await _context.Users.Include(u => u.Role)
+            return await _context.Users
+                .Include(u => u.Role)
                     .ThenInclude(r => r.RolePermissions)
                     .ThenInclude(rp => rp.Permission)
-                    .FirstOrDefaultAsync(u => u.Username == username);
-            return user ?? new User();
+                .FirstOrDefaultAsync(u => u.Username == username); // trả về null nếu không tìm thấy
         }
 
         public async Task AddUserAsync(User user)

@@ -1,6 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using BusinessObject.Models;
+using DataAccess.Repositories.IRepository;
+using HospitalManagementSystem.HospitalManagementSystem_WPF;
+using HospitalManagementSystem_WPF.View;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HospitalManagementSystem_WPF.ViewModel
@@ -10,6 +13,8 @@ namespace HospitalManagementSystem_WPF.ViewModel
         private IServiceProvider _serviceProvider;
         private BaseViewModel? _currentViewModel = null;
         private int _selectedTabIndex;
+
+        public User? CurrentUser { get; private set; }
 
         // Properties for tab visibility
         public Visibility StaffTabVisibility { get; private set; } = Visibility.Visible;
@@ -51,6 +56,10 @@ namespace HospitalManagementSystem_WPF.ViewModel
         public ICommand ShowStaffCommand { get; }
         public ICommand ShowStaffListCommand { get; }
         public ICommand SelectTabCommand { get; }
+        public ICommand LogoutCommand { get; }
+        public ICommand AddCommand { get; }
+        public ICommand EditCommand { get; }
+        public ICommand DeleteCommand { get; }
 
         public MainViewModel(IServiceProvider serviceProvider)
         {
@@ -65,6 +74,10 @@ namespace HospitalManagementSystem_WPF.ViewModel
             ShowStaffCommand = new RelayCommand(ExecuteShowStaff);
             ShowStaffListCommand = new RelayCommand<object>(ExecuteShowStaffList);
             SelectTabCommand = new RelayCommand<int>(ExecuteSelectTab);
+            LogoutCommand = new RelayCommand(Logout);
+            AddCommand = new RelayCommand(ExecuteAdd);
+            EditCommand = new RelayCommand(ExecuteEdit);
+            DeleteCommand = new RelayCommand(ExecuteDelete);
         }
 
         private void UpdateCurrentViewModelBasedOnTab()
@@ -72,7 +85,9 @@ namespace HospitalManagementSystem_WPF.ViewModel
             switch (SelectedTabIndex)
             {
                 case 0: // Staff tab
-                    CurrentViewModel = _serviceProvider.GetRequiredService<StaffViewModel>();
+                    var staffVM = _serviceProvider.GetRequiredService<StaffViewModel>();
+                    staffVM.CurrentUser = CurrentUser; // <-- gán CurrentUser
+                    CurrentViewModel = staffVM;
                     break;
                 case 1: // Departments tab
                     CurrentViewModel = _serviceProvider.GetRequiredService<DepartmentViewModel>();
@@ -101,6 +116,29 @@ namespace HospitalManagementSystem_WPF.ViewModel
         private void ExecuteShowPatients() => SelectedTabIndex = 3;
         private void ExecuteShowInvoices() => SelectedTabIndex = 5;
         private void ExecuteShowStaff() => SelectedTabIndex = 0;
+        private void ExecuteAdd()
+        {
+            if (CurrentViewModel is ICrudOperations crudVm)
+            {
+                crudVm.Add();
+            }
+        }
+
+        private void ExecuteEdit()
+        {
+            if (CurrentViewModel is ICrudOperations crudVm)
+            {
+                crudVm.Edit();
+            }
+        }
+
+        private void ExecuteDelete()
+        {
+            if (CurrentViewModel is ICrudOperations crudVm)
+            {
+                crudVm.Delete();
+            }
+        }
 
         private void ExecuteShowStaffList(object parameter)
         {
@@ -125,8 +163,10 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
         private void ExecuteSelectTab(int tabIndex) => SelectedTabIndex = tabIndex;
 
-        public void SetRole(Role role)
+        public void SetRole(Role role, User? user = null)
         {
+            CurrentUser = user;
+
             StaffTabVisibility = Visibility.Collapsed;
             DepartmentTabVisibility = Visibility.Collapsed;
             RoomTabVisibility = Visibility.Collapsed;
@@ -226,6 +266,40 @@ namespace HospitalManagementSystem_WPF.ViewModel
             OnPropertyChanged(nameof(AddButtonVisibility));
             OnPropertyChanged(nameof(EditButtonVisibility));
             OnPropertyChanged(nameof(DeleteButtonVisibility));
+        }
+
+        public void UpdateCurrentUserIfEdited(User editedUser)
+        {
+            if (CurrentUser != null && editedUser.UserId == CurrentUser.UserId)
+            {
+                // Update role ngay lập tức
+                SetRole(editedUser.Role, editedUser);
+            }
+        }
+
+        private void Logout()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+                mainWindow?.Hide();
+
+                var loginWindow = App.ServiceProvider.GetRequiredService<LoginWindow>();
+                var result = loginWindow.ShowDialog();
+
+                if (result == true && loginWindow.LoggedInUser != null)
+                {
+                    // Reset role cho MainWindow cũ
+                    var mainVM = (MainViewModel)mainWindow.DataContext;
+                    mainVM.SetRole(loginWindow.LoggedInUser.Role);
+
+                    mainWindow.Show();
+                }
+                else
+                {
+                    Application.Current.Shutdown();
+                }
+            });
         }
     }
 }

@@ -24,7 +24,7 @@ namespace HospitalManagementSystem_WPF.View
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 MessageBox.Show("Please enter both username and password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -32,17 +32,23 @@ namespace HospitalManagementSystem_WPF.View
 
             var user = await _loginModel.LoginAsync(username, password);
 
-            if (user != null)
-            {
-                LoggedInUser = user;
-                _mainViewModel.SetRole(user.Role);
-                DialogResult = true;
-                Close();
-            }
-            else
+            if (user == null)
             {
                 MessageBox.Show("Invalid username or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
+
+            if (!user.Status)
+            {
+                MessageBox.Show("Your account is inactive. Please contact admin.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Đăng nhập thành công
+            LoggedInUser = user;
+            _mainViewModel.SetRole(user.Role);
+            DialogResult = true;
+            Close();
         }
     }
 }

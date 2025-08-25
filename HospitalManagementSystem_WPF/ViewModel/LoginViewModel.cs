@@ -11,11 +11,11 @@ namespace HospitalManagementSystem_WPF.ViewModel
         {
             var user = await _userRepository.GetUserWithRoleAsync(username);
 
-            if (user != null && user.VerifyPassword(password))
-            {
-                return user; // user có đầy đủ Role, RolePermissions
-            }
-            return null;
+            if (user == null) return null; // username không tồn tại
+            if (!user.Status) return user;  // inactive
+            if (!user.VerifyPassword(password)) return null; // sai password
+
+            return user; // đăng nhập thành công
         }
     }
 }
