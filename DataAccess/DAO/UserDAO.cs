@@ -26,16 +26,20 @@ namespace DataAccess.DAO
                 .ToListAsync();
         }
 
-        public async Task<User> GetUserByIdAsync(int userId)
+        public async Task<User?> GetUserByIdAsync(int userId)
         {
-            var user = await _context.Users.FindAsync(userId);
-            return user ?? new User();
+            return await _context.Users.Include(u => u.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
-        public async Task<User> GetUserByUsernameAsync(string username)
+        public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-            return user ?? new User();
+            return await _context.Users.Include(u => u.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+                    .FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<User?> GetUserWithRoleAsync(string username)

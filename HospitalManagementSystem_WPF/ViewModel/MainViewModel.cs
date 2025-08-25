@@ -13,6 +13,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
         private IServiceProvider _serviceProvider;
         private BaseViewModel? _currentViewModel = null;
         private int _selectedTabIndex;
+        private Visibility _newRoleButtonVisibility = Visibility.Collapsed;
 
         public User? CurrentUser { get; private set; }
 
@@ -28,6 +29,11 @@ namespace HospitalManagementSystem_WPF.ViewModel
         public Visibility AddButtonVisibility { get; private set; } = Visibility.Visible;
         public Visibility EditButtonVisibility { get; private set; } = Visibility.Visible;
         public Visibility DeleteButtonVisibility { get; private set; } = Visibility.Visible;
+        public Visibility NewRoleButtonVisibility
+        {
+            get => _newRoleButtonVisibility;
+            private set => SetProperty(ref _newRoleButtonVisibility, value);
+        }
 
         public BaseViewModel? CurrentViewModel
         {
@@ -60,6 +66,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
         public ICommand AddCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
+        public ICommand NewRoleCommand { get; }
 
         public MainViewModel(IServiceProvider serviceProvider)
         {
@@ -78,6 +85,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
             AddCommand = new RelayCommand(ExecuteAdd);
             EditCommand = new RelayCommand(ExecuteEdit);
             DeleteCommand = new RelayCommand(ExecuteDelete);
+            NewRoleCommand = new RelayCommand(OpenNewRoleWindow);
         }
 
         private void UpdateCurrentViewModelBasedOnTab()
@@ -163,7 +171,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
         private void ExecuteSelectTab(int tabIndex) => SelectedTabIndex = tabIndex;
 
-        public void SetRole(Role role, User? user = null)
+        public void SetRole(Role? role, User? user = null)
         {
             if (user != null)
                 CurrentUser = user;
@@ -180,6 +188,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
             AddButtonVisibility = Visibility.Collapsed;
             EditButtonVisibility = Visibility.Collapsed;
             DeleteButtonVisibility = Visibility.Collapsed;
+            NewRoleButtonVisibility = Visibility.Collapsed;
 
             // luôn cho xem Patient
             PatientTabVisibility = Visibility.Visible;
@@ -190,9 +199,9 @@ namespace HospitalManagementSystem_WPF.ViewModel
             {
                 foreach (var rp in role.RolePermissions)
                 {
-                    switch (rp.Permission.PermissionName)
+                    switch (rp.Permission.PermissionId)
                     {
-                        case "ViewStaff":
+                        case 1:
                             StaffTabVisibility = Visibility.Visible;
                             if (!defaultTabSet)
                             {
@@ -202,7 +211,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             }
                             break;
 
-                        case "ViewDepartment":
+                        case 2:
                             DepartmentTabVisibility = Visibility.Visible;
                             if (!defaultTabSet)
                             {
@@ -212,7 +221,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             }
                             break;
 
-                        case "ViewRoom":
+                        case 3:
                             RoomTabVisibility = Visibility.Visible;
                             if (!defaultTabSet)
                             {
@@ -222,7 +231,17 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             }
                             break;
 
-                        case "ViewMedication":
+                        case 4:
+                            PatientTabVisibility = Visibility.Visible;
+                            if (!defaultTabSet)
+                            {
+                                SelectedTabIndex = 3;
+                                CurrentViewModel = _serviceProvider.GetRequiredService<PatientViewModel>();
+                                defaultTabSet = true;
+                            }
+                            break;
+
+                        case 5:
                             MedicationTabVisibility = Visibility.Visible;
                             if (!defaultTabSet)
                             {
@@ -232,7 +251,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             }
                             break;
 
-                        case "ViewInvoice":
+                        case 6:
                             InvoiceTabVisibility = Visibility.Visible;
                             if (!defaultTabSet)
                             {
@@ -243,11 +262,12 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             break;
                     }
 
-                    switch (rp.Permission.PermissionName)
+                    // Buttons permissions
+                    switch (rp.Permission.PermissionId)
                     {
-                        case "Add": AddButtonVisibility = Visibility.Visible; break;
-                        case "Edit": EditButtonVisibility = Visibility.Visible; break;
-                        case "Delete": DeleteButtonVisibility = Visibility.Visible; break;
+                        case 7: AddButtonVisibility = Visibility.Visible; break;
+                        case 8: EditButtonVisibility = Visibility.Visible; break;
+                        case 9: DeleteButtonVisibility = Visibility.Visible; break;
                     }
                 }
             }
@@ -259,6 +279,9 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 CurrentViewModel = _serviceProvider.GetRequiredService<PatientViewModel>();
             }
 
+            // Chỉ Admin mới có quyền tạo role mới
+            NewRoleButtonVisibility = (role?.RoleId == 1) ? Visibility.Visible : Visibility.Collapsed;
+
             // notify UI
             OnPropertyChanged(nameof(StaffTabVisibility));
             OnPropertyChanged(nameof(DepartmentTabVisibility));
@@ -269,6 +292,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
             OnPropertyChanged(nameof(AddButtonVisibility));
             OnPropertyChanged(nameof(EditButtonVisibility));
             OnPropertyChanged(nameof(DeleteButtonVisibility));
+            OnPropertyChanged(nameof(NewRoleButtonVisibility));
         }
 
         public void UpdateCurrentUserIfEdited(User editedUser)
@@ -298,12 +322,19 @@ namespace HospitalManagementSystem_WPF.ViewModel
             }
         }
 
+        private void OpenNewRoleWindow()
+        {
+            var roleDialog = _serviceProvider.GetRequiredService<RoleDialogWindow>();
+            roleDialog.Owner = Application.Current.MainWindow;
+            roleDialog.ShowDialog();
+        }
+
         private void Logout()
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-                mainWindow?.Hide();
+                mainWindow?.Hide(); // Đóng MainWindow cũ hẳn
 
                 var loginWindow = App.ServiceProvider.GetRequiredService<LoginWindow>();
                 var result = loginWindow.ShowDialog();

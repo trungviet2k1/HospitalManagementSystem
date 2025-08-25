@@ -13,6 +13,11 @@ namespace DataAccess.Repositories
             return _roleDAO.GetAllRolesAsync();
         }
 
+        public Task<List<Permission>> GetAllPermissionsAsync()
+        {
+            return _roleDAO.GetAllPermissionsAsync();
+        }
+
         public Task<Role?> GetRoleByIdAsync(int roleId)
         {
             return _roleDAO.GetRoleByIdAsync(roleId);

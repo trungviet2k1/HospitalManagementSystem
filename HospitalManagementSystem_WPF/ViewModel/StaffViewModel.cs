@@ -88,7 +88,8 @@ namespace HospitalManagementSystem_WPF.ViewModel
             // 2. Tạo User mới với Role mặc định
             var user = new User
             {
-                RoleId = Roles?.FirstOrDefault()?.RoleId ?? 0
+                RoleId = Roles?.FirstOrDefault()?.RoleId ?? 0,
+                Staff = []
             };
 
             // 3. Tạo Staff mặc định liên kết Department
@@ -164,7 +165,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
                     if (mainVM.CurrentViewModel is StaffViewModel staffVM)
                     {
                         var idx = staffVM.StaffList?.IndexOf(SelectedStaff) ?? -1;
-                        if (idx >= 0)
+                        if (staffVM.StaffList != null && idx >= 0)
                             staffVM.StaffList[idx] = SelectedStaff;
                     }
                 }

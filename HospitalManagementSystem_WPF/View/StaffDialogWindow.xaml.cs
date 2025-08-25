@@ -12,6 +12,20 @@ namespace HospitalManagementSystem_WPF.View
         public ObservableCollection<Department> Departments { get; set; } = [];
         public Department? SelectedDepartment { get; set; }
 
+        public string EmailPrefix
+        {
+            get => User?.Email != null && User.Email.EndsWith("@hsm.com")
+                   ? User.Email.Replace("@hsm.com", "")
+                   : User?.Email ?? "";
+            set
+            {
+                if (User != null)
+                {
+                    User.Email = value + "@hsm.com";
+                }
+            }
+        }   
+
         public StaffDialogWindow(User user, ObservableCollection<Role> roles, ObservableCollection<Department> departments)
         {
             InitializeComponent();

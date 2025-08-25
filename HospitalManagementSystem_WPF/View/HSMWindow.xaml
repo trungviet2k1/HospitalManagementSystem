@@ -22,11 +22,31 @@
         </Grid.RowDefinitions>
 
         <!-- Greeting -->
-        <TextBlock Grid.Row="0" 
-               HorizontalAlignment="Right" VerticalAlignment="Center" 
-               Margin="10"
+        <Grid Grid.Row="0" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Greeting -->
+            <TextBlock Grid.Column="0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Center"
                FontWeight="Bold" FontSize="14"
                Text="{Binding CurrentUser, Converter={StaticResource UserGreetingConverter}}"/>
+
+            <!-- New Role button -->
+            <Button Grid.Column="1"
+                    Content="New Role"
+                    Width="100"
+                    Height="30"
+                    Margin="10,0,0,0"
+                    Background="#2196F3"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    Command="{Binding NewRoleCommand}"
+                    Visibility="{Binding NewRoleButtonVisibility}"/>
+        </Grid>
 
         <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
             <!-- Tab for Staff -->

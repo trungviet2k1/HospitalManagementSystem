@@ -47,7 +47,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
                 // Set role vào MainViewModel (đã được set làm DataContext trong MainWindow)
                 if (mainWindow.DataContext is MainViewModel mainVM)
                 {
-                    mainVM.SetRole(loginWindow.LoggedInUser.Role);
+                    mainVM.SetRole(loginWindow.LoggedInUser.Role, loginWindow.LoggedInUser);
                 }
 
                 // Đặt MainWindow CHÍNH THỨC rồi mới Show
@@ -80,16 +80,24 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<PatientViewModel>();
             services.AddTransient<MedicationViewModel>();
             services.AddTransient<InvoiceViewModel>();
+            services.AddTransient<RoleViewModel>();
+            services.AddTransient<PermissionViewModel>();
+            services.AddTransient<NewPermissionViewModel>();
+            services.AddTransient<PermissionItem>();
 
             // Views
             services.AddSingleton<MainWindow>();
             services.AddTransient<LoginWindow>();
             services.AddTransient<StaffDialogWindow>();
+            services.AddTransient<PermissionDialogWindow>();
+            services.AddTransient<RoleDialogWindow>();
+            services.AddTransient<NewPermissionWindow>();
 
             // DAOs
             services.AddTransient<AppointmentDAO>();
             services.AddTransient<DepartmentDAO>();
             services.AddTransient<PatientDAO>();
+            services.AddTransient<MedicationDAO>();
             services.AddTransient<RoomDAO>();
             services.AddTransient<UserDAO>();
             services.AddTransient<RoleDAO>();
@@ -97,7 +105,9 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             // Repos
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddScoped<IMedicationRepository, MedicationRepository>();
             services.AddScoped<IPatientRepository, PatientRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();

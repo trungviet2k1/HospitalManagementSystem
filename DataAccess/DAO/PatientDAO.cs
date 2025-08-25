@@ -4,40 +4,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.DAO
 {
-    public class PatientDAO(HospitalManagementDbContext context)
+    public class PatientDAO(DbContextOptions<HospitalManagementDbContext> options)
     {
-        private readonly HospitalManagementDbContext _context = context;
+        private readonly DbContextOptions<HospitalManagementDbContext> _options = options;
+
+        private HospitalManagementDbContext CreateContext()
+        {
+            return new HospitalManagementDbContext(_options);
+        }
 
         public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
         {
-            return await _context.Patients.ToListAsync();
+            using var context = CreateContext();
+            return await context.Patients.ToListAsync();
         }
 
         public async Task<Patient> GetPatientByIdAsync(int patientId)
         {
-            var patient = await _context.Patients.FindAsync(patientId);
+            using var context = CreateContext();
+            var patient = await context.Patients.FindAsync(patientId);
             return patient ?? new Patient();
         }
 
         public async Task AddPatientAsync(Patient patient)
         {
-            _context.Patients.Add(patient);
-            await _context.SaveChangesAsync();
+            using var context = CreateContext();
+            context.Patients.Add(patient);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdatePatientAsync(Patient patient)
         {
-            _context.Patients.Update(patient);
-            await _context.SaveChangesAsync();
+            using var context = CreateContext();
+            context.Patients.Update(patient);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeletePatientAsync(int patientId)
         {
-            var patient = await _context.Patients.FindAsync(patientId);
+            using var context = CreateContext();
+            var patient = await context.Patients.FindAsync(patientId);
             if (patient != null)
             {
-                _context.Patients.Remove(patient);
-                await _context.SaveChangesAsync();
+                context.Patients.Remove(patient);
+                await context.SaveChangesAsync();
             }
         }
     }

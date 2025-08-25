@@ -51,7 +51,11 @@
 
             <!-- Email -->
             <TextBlock Text="Email:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold"/>
-            <TextBox Text="{Binding User.Email, Mode=TwoWay}" Grid.Row="3" Grid.Column="1" Margin="5" Padding="5"/>
+            <TextBlock Text="Email:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold"/>
+            <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1" Margin="5">
+                <TextBox x:Name="EmailPrefixTextBox" Width="180" Text="{Binding EmailPrefix, Mode=TwoWay}" Padding="5"/>
+                <TextBlock Text="@hsm.com" VerticalAlignment="Center" Margin="5,0,0,0"/>
+            </StackPanel>
 
             <!-- Phone -->
             <TextBlock Text="Phone:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold"/>
