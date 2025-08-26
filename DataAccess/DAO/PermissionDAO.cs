@@ -48,12 +48,24 @@ namespace DataAccess.DAO
 
         public async Task DeletePermissionAsync(HospitalManagementDbContext context, int permissionId)
         {
-            var permission = await context.Permissions.FindAsync(permissionId);
-            if (permission != null)
+            var permission = await context.Permissions
+                                  .Include(p => p.RolePermissions)
+                                  .FirstOrDefaultAsync(p => p.PermissionId == permissionId);
+
+            if (permission == null) return;
+
+            // Check có bao nhiêu role đang sử dụng permission này
+            int roleCount = permission.RolePermissions.Count;
+
+            if (roleCount > 0)
             {
-                context.Permissions.Remove(permission);
-                await context.SaveChangesAsync();
+                // Báo lỗi cho UI xử lý
+                throw new InvalidOperationException(
+                    $"Permission '{permission.PermissionName}' đang được {roleCount} role(s) sử dụng, không thể xóa.");
             }
+
+            context.Permissions.Remove(permission);
+            await context.SaveChangesAsync();
         }
     }
 }

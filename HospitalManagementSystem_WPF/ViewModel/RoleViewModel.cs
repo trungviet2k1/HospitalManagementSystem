@@ -74,13 +74,33 @@ namespace HospitalManagementSystem_WPF.ViewModel
         {
             if (SelectedRole == null) return;
 
-            var result = MessageBox.Show($"Do you want to delete role '{SelectedRole.RoleName}'?",
-                                         "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            // Check nếu là Admin thì không cho xóa
+            if (SelectedRole.RoleId == 1)
+            {
+                MessageBox.Show("Không thể xóa Role 'Admin'!",
+                                "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Kiểm tra số lượng user đang dùng Role
+            int userCount = await _roleRepository.CountUsersByRoleAsync(SelectedRole.RoleId);
+            if (userCount > 0)
+            {
+                MessageBox.Show($"Không thể xóa Role '{SelectedRole.RoleName}' vì hiện có {userCount} tài khoản đang sử dụng Role này.",
+                                "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show($"Bạn có chắc muốn xóa Role '{SelectedRole.RoleName}'?",
+                                         "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
             await _roleRepository.DeleteRoleAsync(SelectedRole.RoleId);
             RoleList?.Remove(SelectedRole);
             SelectedRole = null;
+
+            MessageBox.Show("Role đã được xóa thành công!",
+                            "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ViewPermission()

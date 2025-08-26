@@ -40,6 +40,12 @@ namespace DataAccess.DAO
                                 .FirstOrDefaultAsync(r => r.RoleId == roleId);
         }
 
+        public async Task<int> CountUsersByRoleAsync(int roleId)
+        {
+            using var context = CreateContext();
+            return await context.Users.CountAsync(u => u.RoleId == roleId);
+        }
+
         public async Task AddRoleAsync(Role role)
         {
             using var context = CreateContext();

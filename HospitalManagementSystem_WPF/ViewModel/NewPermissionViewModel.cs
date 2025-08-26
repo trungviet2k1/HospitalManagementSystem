@@ -93,11 +93,24 @@ public class NewPermissionViewModel : BaseViewModel
     {
         if (permission == null) return;
 
-        var result = MessageBox.Show($"Do you want to delete '{permission.PermissionName}'?", "Confirm", MessageBoxButton.YesNo);
-        if (result == MessageBoxResult.Yes)
+        var result = MessageBox.Show(
+            $"Bạn có muốn xóa quyền '{permission.PermissionName}' không?",
+            "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        try
         {
             await _permissionRepository.DeletePermissionAsync(permission.PermissionId);
             PermissionList.Remove(permission);
+        }
+        catch (InvalidOperationException ex)
+        {
+            MessageBox.Show(ex.Message, "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Lỗi khi xóa permission: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

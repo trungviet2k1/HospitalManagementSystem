@@ -23,6 +23,11 @@ namespace DataAccess.Repositories
             return _roleDAO.GetRoleByIdAsync(roleId);
         }
 
+        public Task<int> CountUsersByRoleAsync(int roleId)
+        {
+            return _roleDAO.CountUsersByRoleAsync(roleId);
+        }
+
         public Task AddRoleAsync(Role role)
         {
             return _roleDAO.AddRoleAsync(role);

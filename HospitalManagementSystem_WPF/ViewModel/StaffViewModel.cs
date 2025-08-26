@@ -180,8 +180,16 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 return;
             }
 
+            if (SelectedStaff.Role != null && SelectedStaff.Role.RoleId == 1)
+            {
+                MessageBox.Show("Không thể xóa người dùng này vì đây là tài khoản của Admin!",
+                                "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa nhân viên {SelectedStaff.FullName}?",
                                          "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
             if (result == MessageBoxResult.Yes)
             {
                 await _userRepository.DeleteUserAsync(SelectedStaff.UserId);
