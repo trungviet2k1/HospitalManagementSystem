@@ -3,6 +3,7 @@ using DataAccess.Repositories.IRepository;
 using System.Collections.ObjectModel;
 using System.Windows;
 using HospitalManagementSystem_WPF.View;
+using Microsoft.EntityFrameworkCore;
 
 namespace HospitalManagementSystem_WPF.ViewModel
 {
@@ -11,6 +12,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IDepartmentRepository _departmentRepository;
+        private readonly ILogRepository _logRepository;
         private ObservableCollection<User>? _staffList;
         private ObservableCollection<Role>? _roles;
         private ObservableCollection<Department>? _departments;
@@ -50,15 +52,41 @@ namespace HospitalManagementSystem_WPF.ViewModel
         }
 
         // Constructor nhận CurrentUser từ MainViewModel (hoặc gán sau)
-        public StaffViewModel(IUserRepository userRepository, IRoleRepository roleRepository, IDepartmentRepository departmentRepository, User? currentUser = null)
+        public StaffViewModel(
+                IUserRepository userRepository,
+                IRoleRepository roleRepository,
+                IDepartmentRepository departmentRepository,
+                ILogRepository logRepository,
+                User currentUser)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _departmentRepository = departmentRepository;
+            _logRepository = logRepository;
             CurrentUser = currentUser;
 
             LoadStaffsAsync();
             _ = LoadRolesAsync();
+        }
+
+        private async Task AddStaffLogAsync(string action)
+        {
+            try
+            {
+                if (CurrentUser == null) return;
+
+                var log = new Log
+                {
+                    UserId = CurrentUser.UserId,
+                    Action = action,
+                    Timestamp = DateTime.Now
+                };
+                await _logRepository.AddLogAsync(log);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Staff log failed: {ex.Message}");
+            }
         }
 
         public async void LoadStaffsAsync()
@@ -79,20 +107,14 @@ namespace HospitalManagementSystem_WPF.ViewModel
             Departments = [.. depts];
         }
 
-        public async void Add()
+        public async Task Add()
         {
             // 1. Load Roles & Departments trước khi mở dialog
             await LoadRolesAsync();
             await LoadDepartmentsAsync();
 
             // 2. Tạo User mới với Role mặc định
-            var user = new User
-            {
-                RoleId = Roles?.FirstOrDefault()?.RoleId ?? 0,
-                Staff = []
-            };
-
-            // 3. Tạo Staff mặc định liên kết Department
+            var user = new User { RoleId = Roles?.FirstOrDefault()?.RoleId ?? 0, Staff = [] };
             var staff = new Staff
             {
                 DepartmentId = Departments?.FirstOrDefault()?.DepartmentId ?? 0,
@@ -102,22 +124,17 @@ namespace HospitalManagementSystem_WPF.ViewModel
             };
             user.Staff.Add(staff);
 
-            // 4. Mở dialog
-            var dialog = new StaffDialogWindow(
-                user,
-                Roles ?? [],
-                Departments ?? []
-            )
-            {
-                Owner = Application.Current.MainWindow
-            };
+            // 3. Mở dialog
+            var dialog = new StaffDialogWindow(user, Roles ?? [], Departments ?? [])
+            { Owner = Application.Current.MainWindow };
 
             if (dialog.ShowDialog() == true)
             {
-                // 5. Thêm User vào database và cập nhật StaffList
                 await _userRepository.AddUserAsync(user);
                 StaffList?.Add(user);
                 SelectedStaff = user;
+
+                await AddStaffLogAsync($"Added new staff '{user.FullName}' successfully.");
             }
         }
 
@@ -133,11 +150,32 @@ namespace HospitalManagementSystem_WPF.ViewModel
             await LoadRolesAsync();
             await LoadDepartmentsAsync();
 
-            // 2. Cập nhật RoleId nếu Role != null
-            if (SelectedStaff.Role != null)
-                SelectedStaff.RoleId = SelectedStaff.Role.RoleId;
+            if (Roles == null || Roles.Count == 0 || Departments == null || Departments.Count == 0)
+            {
+                MessageBox.Show("Không có Role hoặc Department nào để gán.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-            // 3. Mở dialog
+            // 2. Cập nhật RoleId nếu Role != null
+            if (SelectedStaff.Role == null)
+                SelectedStaff.Role = Roles.FirstOrDefault();
+
+            SelectedStaff.RoleId = SelectedStaff.Role?.RoleId ?? 0;
+
+            // 3. đảm bảo selected staff không null
+            if (SelectedStaff.Staff == null || SelectedStaff.Staff.Count == 0)
+            {
+                var staff = new Staff
+                {
+                    Department = Departments.First(),
+                    DepartmentId = Departments.First().DepartmentId,
+                    User = SelectedStaff,
+                    UserId = SelectedStaff.UserId
+                };
+                SelectedStaff.Staff = new ObservableCollection<Staff> { staff };
+            }
+
+            // 4. Mở dialog
             var dialog = new StaffDialogWindow(
                 SelectedStaff,
                 Roles ?? [],
@@ -149,25 +187,36 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
             if (dialog.ShowDialog() == true)
             {
-                // 4. Cập nhật User trong database
-                await _userRepository.UpdateUserAsync(SelectedStaff);
-
-                // 5. Cập nhật ObservableCollection
-                var index = StaffList?.IndexOf(SelectedStaff) ?? -1;
-                if (index >= 0 && StaffList != null)
-                    StaffList[index] = SelectedStaff;
-
-                // 6. Cập nhật MainViewModel nếu CurrentUser bị sửa
-                if (Application.Current.MainWindow?.DataContext is MainViewModel mainVM)
+                try
                 {
-                    mainVM.UpdateCurrentUserIfEdited(SelectedStaff);
+                    // 5. Cập nhật User
+                    await _userRepository.UpdateUserAsync(SelectedStaff);
 
-                    if (mainVM.CurrentViewModel is StaffViewModel staffVM)
+                    // 6. Cập nhật ObservableCollection
+                    var index = StaffList?.IndexOf(SelectedStaff) ?? -1;
+                    if (index >= 0 && StaffList != null)
+                        StaffList[index] = SelectedStaff;
+
+                    // 7. Cập nhật MainViewModel nếu CurrentUser bị sửa
+                    if (Application.Current.MainWindow?.DataContext is MainViewModel mainVM)
                     {
-                        var idx = staffVM.StaffList?.IndexOf(SelectedStaff) ?? -1;
-                        if (staffVM.StaffList != null && idx >= 0)
-                            staffVM.StaffList[idx] = SelectedStaff;
+                        mainVM.UpdateCurrentUserIfEdited(SelectedStaff);
+
+                        if (mainVM.CurrentViewModel is StaffViewModel staffVM)
+                        {
+                            var idx = staffVM.StaffList?.IndexOf(SelectedStaff) ?? -1;
+                            if (staffVM.StaffList != null && idx >= 0)
+                                staffVM.StaffList[idx] = SelectedStaff;
+                        }
                     }
+
+                    // 8. Log
+                    await AddStaffLogAsync($"Edited staff successfully.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Cập nhật thất bại: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await AddStaffLogAsync($"Failed to edit staff '{SelectedStaff.FullName}': {ex.Message}");
                 }
             }
         }
@@ -184,6 +233,8 @@ namespace HospitalManagementSystem_WPF.ViewModel
             {
                 MessageBox.Show("Không thể xóa người dùng này vì đây là tài khoản của Admin!",
                                 "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                await AddStaffLogAsync($"Attempted to delete Admin '{SelectedStaff.FullName}' - action blocked.");
                 return;
             }
 
@@ -192,10 +243,25 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
             if (result == MessageBoxResult.Yes)
             {
-                await _userRepository.DeleteUserAsync(SelectedStaff.UserId);
-                StaffList?.Remove(SelectedStaff);
-                SelectedStaff = null;
+                try
+                {
+                    await _userRepository.DeleteUserAsync(SelectedStaff.UserId);
+                    await AddStaffLogAsync($"Deleted staff '{SelectedStaff.FullName}' successfully.");
+                    StaffList?.Remove(SelectedStaff);
+                    SelectedStaff = null;
+                }
+                catch (DbUpdateException)
+                {
+                    MessageBox.Show($"Không thể xóa '{SelectedStaff.FullName}' vì còn dữ liệu liên quan",
+                                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await AddStaffLogAsync($"Failed to delete staff '{SelectedStaff.FullName}'");
+                }
             }
+        }
+
+        void ICrudOperations.Add()
+        {
+            _ = Add();
         }
     }
 }

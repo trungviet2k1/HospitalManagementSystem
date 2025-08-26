@@ -12,10 +12,21 @@ namespace HospitalManagementSystem_WPF.ViewModel
     {
         private IServiceProvider _serviceProvider;
         private BaseViewModel? _currentViewModel = null;
+        private LogWindow _logWindow;
         private int _selectedTabIndex;
         private bool _hasPermission;
+
+        // add new role button visibility
         private Visibility _newRoleButtonVisibility = Visibility.Collapsed;
         public Visibility AppointmentTabVisibility { get; private set; } = Visibility.Collapsed;
+
+        // view logs button visibility
+        private Visibility _viewLogsButtonVisibility = Visibility.Collapsed;
+        public Visibility ViewLogsButtonVisibility
+        {
+            get => _viewLogsButtonVisibility;
+            set => SetProperty(ref _viewLogsButtonVisibility, value);
+        }
 
         public User? CurrentUser { get; private set; }
 
@@ -76,6 +87,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
         public ICommand DeleteCommand { get; }
         public ICommand NewRoleCommand { get; }
         public ICommand ContactAdminCommand { get; }
+        public ICommand OpenLogWindowCommand { get; }
 
         public MainViewModel(IServiceProvider serviceProvider)
         {
@@ -90,12 +102,13 @@ namespace HospitalManagementSystem_WPF.ViewModel
             ShowStaffCommand = new RelayCommand((param) => ExecuteShowStaff());
             ShowStaffListCommand = new RelayCommand<object>((param) => ExecuteShowStaffList(param));
             SelectTabCommand = new RelayCommand<int>((param) => ExecuteSelectTab(param));
-            LogoutCommand = new RelayCommand((param) => Logout());
+            LogoutCommand = new RelayCommand(async (param) => await Logout());
             AddCommand = new RelayCommand((param) => ExecuteAdd());
             EditCommand = new RelayCommand((param) => ExecuteEdit());
             DeleteCommand = new RelayCommand((param) => ExecuteDelete());
             NewRoleCommand = new RelayCommand((param) => OpenNewRoleWindow());
             ContactAdminCommand = new RelayCommand((param) => ContactAdmin());
+            OpenLogWindowCommand = new RelayCommand(_ => OpenLogWindow());
         }
 
         private void UpdateCurrentViewModelBasedOnTab()
@@ -103,8 +116,13 @@ namespace HospitalManagementSystem_WPF.ViewModel
             switch (SelectedTabIndex)
             {
                 case 0: // Staff tab
-                    var staffVM = _serviceProvider.GetRequiredService<StaffViewModel>();
-                    staffVM.CurrentUser = CurrentUser; // <-- gán CurrentUser
+                    var staffVM = new StaffViewModel(
+                            _serviceProvider.GetRequiredService<IUserRepository>(),
+                            _serviceProvider.GetRequiredService<IRoleRepository>(),
+                            _serviceProvider.GetRequiredService<IDepartmentRepository>(),
+                            _serviceProvider.GetRequiredService<ILogRepository>(),
+                            CurrentUser // <-- truyền CurrentUser từ MainViewModel
+                    );
                     CurrentViewModel = staffVM;
                     break;
                 case 1: // Departments tab
@@ -220,7 +238,14 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             if (!defaultTabSet)
                             {
                                 SelectedTabIndex = 0;
-                                CurrentViewModel = _serviceProvider.GetRequiredService<StaffViewModel>();
+                                var staffVM = new StaffViewModel(
+                                        _serviceProvider.GetRequiredService<IUserRepository>(),
+                                        _serviceProvider.GetRequiredService<IRoleRepository>(),
+                                        _serviceProvider.GetRequiredService<IDepartmentRepository>(),
+                                        _serviceProvider.GetRequiredService<ILogRepository>(),
+                                        CurrentUser // <-- truyền CurrentUser từ MainViewModel
+                                );
+                                CurrentViewModel = staffVM;
                                 defaultTabSet = true;
                             }
                             break;
@@ -325,8 +350,9 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 CurrentViewModel = _serviceProvider.GetRequiredService<StaffViewModel>();
             }
 
-            // Chỉ Admin mới có quyền tạo role mới
+            // Chỉ Admin mới có quyền tạo role mới và xem logs
             NewRoleButtonVisibility = (role?.RoleId == 1) ? Visibility.Visible : Visibility.Collapsed;
+            ViewLogsButtonVisibility = (role?.RoleId == 1) ? Visibility.Visible : Visibility.Collapsed;
 
             // notify UI
             OnPropertyChanged(nameof(StaffTabVisibility));
@@ -340,6 +366,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
             OnPropertyChanged(nameof(EditButtonVisibility));
             OnPropertyChanged(nameof(DeleteButtonVisibility));
             OnPropertyChanged(nameof(NewRoleButtonVisibility));
+            OnPropertyChanged(nameof(ViewLogsButtonVisibility));
         }
 
         private void CheckPermissions()
@@ -393,12 +420,56 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 "Thông tin liên hệ", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        public void Logout()
+        private void OpenLogWindow()
         {
+            if (CurrentUser?.RoleId != 1) // Chỉ admin mới mở
+            {
+                MessageBox.Show("You do not have permission to view logs.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_logWindow == null || !_logWindow.IsLoaded)
+            {
+                var logVM = _serviceProvider.GetRequiredService<LogViewModel>();
+                _logWindow = new LogWindow(logVM);
+                _logWindow.Owner = Application.Current.MainWindow;
+                _logWindow.SetCurrentUser(CurrentUser);
+                _logWindow.Closed += (s, e) => _logWindow = null;
+                _logWindow.Show();
+            }
+            else
+            {
+                _logWindow.Focus();
+            }
+        }
+
+        public async Task Logout()
+        {
+            if (CurrentUser != null)
+            {
+                try
+                {
+                    // Ghi log logout
+                    var log = new Log
+                    {
+                        UserId = CurrentUser.UserId,
+                        Action = $"User '{CurrentUser.FullName}' logged out.",
+                        Timestamp = DateTime.Now
+                    };
+
+                    var logRepository = _serviceProvider.GetRequiredService<ILogRepository>();
+                    await logRepository.AddLogAsync(log);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Logout logging failed: {ex.Message}");
+                }
+            }
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-                mainWindow?.Hide(); // Đóng MainWindow cũ hẳn
+                mainWindow?.Hide();
 
                 var loginWindow = App.ServiceProvider.GetRequiredService<LoginWindow>();
                 var result = loginWindow.ShowDialog();
@@ -416,6 +487,12 @@ namespace HospitalManagementSystem_WPF.ViewModel
                     Application.Current.Shutdown();
                 }
             });
+
+            if (_logWindow != null)
+            {
+                _logWindow.Close();
+                _logWindow = null;
+            }
         }
     }
 }

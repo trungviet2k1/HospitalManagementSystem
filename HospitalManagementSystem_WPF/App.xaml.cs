@@ -32,7 +32,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             ConfigureServices(services);
             ServiceProvider = services.BuildServiceProvider();
 
-            // 3) RẤT QUAN TRỌNG: chặn WPF auto-shutdown khi login window đóng
+            // 3) chặn WPF auto-shutdown khi login window đóng
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             // 4) Show login dialog
@@ -50,7 +50,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
                     mainVM.SetRole(loginWindow.LoggedInUser.Role, loginWindow.LoggedInUser);
                 }
 
-                // Đặt MainWindow CHÍNH THỨC rồi mới Show
+                // Đặt MainWindow chính thức rồi mới Show
                 MainWindow = mainWindow;
                 MainWindow.Show();
 
@@ -87,6 +87,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<AppointmentViewModel>();
             services.AddTransient<NoPermissionViewModel>();
             services.AddTransient<MedicationViewModel>();
+            services.AddTransient<LogViewModel>();
 
             // Views
             services.AddSingleton<MainWindow>();
@@ -98,6 +99,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<PatientDialogWindow>();
             services.AddTransient<AppointmentDialogWindow>();
             services.AddTransient<MedicationDialogWindow>();
+            services.AddTransient<LogWindow>();
 
             // DAOs
             services.AddTransient<AppointmentDAO>();
@@ -107,6 +109,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<RoomDAO>();
             services.AddTransient<UserDAO>();
             services.AddTransient<RoleDAO>();
+            services.AddTransient<LogDAO>();
 
             // Repos
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
@@ -117,6 +120,7 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<ILogRepository, LogRepository>();
 
             // DbContext
             var connectionString = Configuration!.GetConnectionString("DBContext");

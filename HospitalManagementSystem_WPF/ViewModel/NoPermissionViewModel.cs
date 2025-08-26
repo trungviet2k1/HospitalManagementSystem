@@ -18,7 +18,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
             _mainViewModel = mainViewModel;
 
             ContactAdminCommand = new RelayCommand((param) => ContactAdmin());
-            LogoutCommand = new RelayCommand((param) => Logout());
+            LogoutCommand = new RelayCommand(async (param) => await Logout());
         }
 
         private static void ContactAdmin()
@@ -27,9 +27,9 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 "Thông tin liên hệ", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void Logout()
+        private async Task Logout()
         {
-            _mainViewModel.Logout();
+           await _mainViewModel.Logout();
         }
     }
 }

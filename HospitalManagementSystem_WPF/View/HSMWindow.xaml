@@ -268,6 +268,9 @@
                 <Button Content="Delete" Width="100" Height="40" Margin="5" Background="#F44336" 
                         Foreground="White" FontWeight="Bold" Command="{Binding DeleteCommand}" 
                         Visibility="{Binding DeleteButtonVisibility}"/>
+                <Button Content="View Logs" Width="100" Height="40"
+                        Command="{Binding OpenLogWindowCommand}"
+                        Visibility="{Binding ViewLogsButtonVisibility}"/>
             </StackPanel>
         </Grid>
     </Grid>
