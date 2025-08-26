@@ -26,7 +26,10 @@ namespace HospitalManagementSystem_WPF.ViewModel
 
             Permissions = [];
 
-            SaveCommand = new RelayCommand(async () => await SaveAsync());
+            SaveCommand = new RelayCommand(
+                execute: (parameter) => SaveAsync(),
+                canExecute: (parameter) => true
+            );
 
             LoadPermissionsAsync();
         }
@@ -48,7 +51,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
             }
         }
 
-        private async Task SaveAsync()
+        private async void SaveAsync()
         {
             _role.RolePermissions ??= [];
 

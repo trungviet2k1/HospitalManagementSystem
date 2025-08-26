@@ -84,6 +84,8 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<PermissionViewModel>();
             services.AddTransient<NewPermissionViewModel>();
             services.AddTransient<PermissionItem>();
+            services.AddTransient<AppointmentViewModel>();
+            services.AddTransient<NoPermissionViewModel>();
 
             // Views
             services.AddSingleton<MainWindow>();
@@ -92,6 +94,8 @@ namespace HospitalManagementSystem.HospitalManagementSystem_WPF
             services.AddTransient<PermissionDialogWindow>();
             services.AddTransient<RoleDialogWindow>();
             services.AddTransient<NewPermissionWindow>();
+            services.AddTransient<PatientDialogWindow>();
+            services.AddTransient<AppointmentDialogWindow>();
 
             // DAOs
             services.AddTransient<AppointmentDAO>();

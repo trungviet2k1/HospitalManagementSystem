@@ -10,6 +10,7 @@ public class NewPermissionViewModel : BaseViewModel
     private readonly IPermissionRepository _permissionRepository;
 
     private string _permissionName = string.Empty;
+
     public string PermissionName
     {
         get => _permissionName;
@@ -23,7 +24,7 @@ public class NewPermissionViewModel : BaseViewModel
         set => SetProperty(ref _selectedPermission, value);
     }
 
-    public ObservableCollection<Permission> PermissionList { get; set; } = new();
+    public ObservableCollection<Permission> PermissionList { get; set; } = [];
 
     public ICommand AddPermissionCommand { get; }
     public ICommand EditPermissionCommand { get; }
@@ -33,9 +34,20 @@ public class NewPermissionViewModel : BaseViewModel
     {
         _permissionRepository = permissionRepository;
 
-        AddPermissionCommand = new RelayCommand(AddPermission);
-        EditPermissionCommand = new RelayCommand<Permission>(EditPermission);
-        DeletePermissionCommand = new RelayCommand<Permission>(DeletePermission);
+        AddPermissionCommand = new RelayCommand(
+            execute: (parameter) => AddPermission(),
+            canExecute: (parameter) => true
+        );
+
+        EditPermissionCommand = new RelayCommand<Permission>(
+            execute: (permission) => EditPermission(permission),
+            canExecute: (permission) => permission != null
+        );
+
+        DeletePermissionCommand = new RelayCommand<Permission>(
+            execute: (permission) => DeletePermission(permission),
+            canExecute: (permission) => permission != null
+        );
 
         LoadPermissions();
     }
@@ -59,7 +71,7 @@ public class NewPermissionViewModel : BaseViewModel
         var newPerm = new Permission { PermissionName = PermissionName };
         await _permissionRepository.AddPermissionAsync(newPerm);
 
-        PermissionList.Add(newPerm); // load ngay vào list
+        PermissionList.Add(newPerm);
         PermissionName = string.Empty;
     }
 

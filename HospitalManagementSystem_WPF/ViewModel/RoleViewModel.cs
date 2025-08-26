@@ -37,11 +37,11 @@ namespace HospitalManagementSystem_WPF.ViewModel
             _roleRepository = roleRepository;
             _permissionRepository = permissionRepository;
 
-            AddCommand = new RelayCommand(Add);
-            EditCommand = new RelayCommand(Edit);
-            DeleteCommand = new RelayCommand(Delete);
-            ViewPermissionCommand = new RelayCommand(ViewPermission);
-            NewPermissionCommand = new RelayCommand(NewPermission);
+            AddCommand = new RelayCommand(execute: (parameter) => Add(), canExecute: (parameter) => true);
+            EditCommand = new RelayCommand(execute: (parameter) => Edit(), canExecute: (parameter) => true);
+            DeleteCommand = new RelayCommand(execute: (parameter) => Delete(), canExecute: (parameter) => true);
+            ViewPermissionCommand = new RelayCommand(execute: (parameter) => ViewPermission(), canExecute: (parameter) => true);
+            NewPermissionCommand = new RelayCommand(execute: (parameter) => NewPermission(), canExecute: (parameter) => true);
 
             LoadRolesAsync();
         }

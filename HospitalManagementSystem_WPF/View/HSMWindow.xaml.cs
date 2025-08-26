@@ -16,7 +16,9 @@ namespace HospitalManagementSystem_WPF
                 throw new InvalidOperationException("ServiceProvider is not initialized.");
             }
 
-            DataContext = App.ServiceProvider.GetRequiredService<MainViewModel>();
+            // Lấy MainViewModel từ ServiceProvider
+            var mainViewModel = App.ServiceProvider.GetRequiredService<MainViewModel>();
+            DataContext = mainViewModel;
         }
     }
 }

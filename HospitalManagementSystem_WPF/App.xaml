@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:HospitalManagementSystem_WPF">
     <Application.Resources>
         <ResourceDictionary>
+            <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <local:BooleanToStatusConverter x:Key="BooleanToStatusConverter"/>
         </ResourceDictionary>
     </Application.Resources>

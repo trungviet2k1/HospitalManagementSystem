@@ -9,28 +9,35 @@ namespace DataAccess.Repositories.RepositoryImp
         private readonly AppointmentDAO _appointmentDAO = appointmentDAO;
 
         public Task<IEnumerable<Appointment>> GetAllAppointmentsAsync()
+            => _appointmentDAO.GetAllAppointmentsAsync();
+
+        public Task<Appointment?> GetAppointmentByIdAsync(int appointmentId)
+            => _appointmentDAO.GetAppointmentByIdAsync(appointmentId);
+
+        public async Task<Appointment?> GetAppointmentWithDetailsAsync(int appointmentId)
         {
-            return _appointmentDAO.GetAllAppointmentsAsync();
+            return await _appointmentDAO.GetAppointmentByIdAsync(appointmentId);
         }
 
-        public Task<Appointment> GetAppointmentByIdAsync(int appointmentId)
-        {
-            return _appointmentDAO.GetAppointmentByIdAsync(appointmentId);
-        }
+        public Task<IEnumerable<Appointment>> GetAppointmentsByDoctorAsync(int doctorId)
+            => _appointmentDAO.GetAppointmentsByDoctorAsync(doctorId);
+
+        public Task<IEnumerable<Appointment>> GetAppointmentsByPatientAsync(int patientId)
+            => _appointmentDAO.GetAppointmentsByPatientAsync(patientId);
+
+        public Task<IEnumerable<Appointment>> GetUpcomingAppointmentsAsync(DateTime startDate, DateTime endDate)
+            => _appointmentDAO.GetUpcomingAppointmentsAsync(startDate, endDate);
 
         public Task AddAppointmentAsync(Appointment appointment)
-        {
-            return _appointmentDAO.AddAppointmentAsync(appointment);
-        }
+            => _appointmentDAO.AddAppointmentAsync(appointment);
 
         public Task UpdateAppointmentAsync(Appointment appointment)
-        {
-            return _appointmentDAO.UpdateAppointmentAsync(appointment);
-        }
+            => _appointmentDAO.UpdateAppointmentAsync(appointment);
 
         public Task DeleteAppointmentAsync(int appointmentId)
-        {
-            return _appointmentDAO.DeleteAppointmentAsync(appointmentId);
-        }
+            => _appointmentDAO.DeleteAppointmentAsync(appointmentId);
+
+        public Task<bool> IsTimeSlotAvailableAsync(int doctorId, DateTime appointmentDate, int excludeAppointmentId = 0)
+            => _appointmentDAO.IsTimeSlotAvailableAsync(doctorId, appointmentDate, excludeAppointmentId);
     }
 }

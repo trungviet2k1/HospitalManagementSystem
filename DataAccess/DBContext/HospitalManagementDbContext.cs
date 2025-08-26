@@ -162,6 +162,7 @@ public partial class HospitalManagementDbContext : DbContext
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.DoctorId).HasColumnName("DoctorID");
             entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.DateOfBirth).HasColumnType("date");
             entity.Property(e => e.Gender).HasMaxLength(10);
             entity.Property(e => e.PhoneNumber).HasMaxLength(15);
 

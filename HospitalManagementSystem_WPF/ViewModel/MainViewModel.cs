@@ -13,7 +13,9 @@ namespace HospitalManagementSystem_WPF.ViewModel
         private IServiceProvider _serviceProvider;
         private BaseViewModel? _currentViewModel = null;
         private int _selectedTabIndex;
+        private bool _hasPermission;
         private Visibility _newRoleButtonVisibility = Visibility.Collapsed;
+        public Visibility AppointmentTabVisibility { get; private set; } = Visibility.Collapsed;
 
         public User? CurrentUser { get; private set; }
 
@@ -33,6 +35,12 @@ namespace HospitalManagementSystem_WPF.ViewModel
         {
             get => _newRoleButtonVisibility;
             private set => SetProperty(ref _newRoleButtonVisibility, value);
+        }
+
+        public bool HasPermission
+        {
+            get => _hasPermission;
+            set => SetProperty(ref _hasPermission, value);
         }
 
         public BaseViewModel? CurrentViewModel
@@ -67,25 +75,27 @@ namespace HospitalManagementSystem_WPF.ViewModel
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand NewRoleCommand { get; }
+        public ICommand ContactAdminCommand { get; }
 
         public MainViewModel(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
 
-            ShowRoomsCommand = new RelayCommand(ExecuteShowRooms);
-            ShowDepartmentsCommand = new RelayCommand(ExecuteShowDepartments);
-            ShowDoctorsCommand = new RelayCommand(ExecuteShowDoctors);
-            ShowMedicationsCommand = new RelayCommand(ExecuteShowMedications);
-            ShowPatientsCommand = new RelayCommand(ExecuteShowPatients);
-            ShowInvoicesCommand = new RelayCommand(ExecuteShowInvoices);
-            ShowStaffCommand = new RelayCommand(ExecuteShowStaff);
-            ShowStaffListCommand = new RelayCommand<object>(ExecuteShowStaffList);
-            SelectTabCommand = new RelayCommand<int>(ExecuteSelectTab);
-            LogoutCommand = new RelayCommand(Logout);
-            AddCommand = new RelayCommand(ExecuteAdd);
-            EditCommand = new RelayCommand(ExecuteEdit);
-            DeleteCommand = new RelayCommand(ExecuteDelete);
-            NewRoleCommand = new RelayCommand(OpenNewRoleWindow);
+            ShowRoomsCommand = new RelayCommand((param) => ExecuteShowRooms());
+            ShowDepartmentsCommand = new RelayCommand((param) => ExecuteShowDepartments());
+            ShowDoctorsCommand = new RelayCommand((param) => ExecuteShowDoctors());
+            ShowMedicationsCommand = new RelayCommand((param) => ExecuteShowMedications());
+            ShowPatientsCommand = new RelayCommand((param) => ExecuteShowPatients());
+            ShowInvoicesCommand = new RelayCommand((param) => ExecuteShowInvoices());
+            ShowStaffCommand = new RelayCommand((param) => ExecuteShowStaff());
+            ShowStaffListCommand = new RelayCommand<object>((param) => ExecuteShowStaffList(param));
+            SelectTabCommand = new RelayCommand<int>((param) => ExecuteSelectTab(param));
+            LogoutCommand = new RelayCommand((param) => Logout());
+            AddCommand = new RelayCommand((param) => ExecuteAdd());
+            EditCommand = new RelayCommand((param) => ExecuteEdit());
+            DeleteCommand = new RelayCommand((param) => ExecuteDelete());
+            NewRoleCommand = new RelayCommand((param) => OpenNewRoleWindow());
+            ContactAdminCommand = new RelayCommand((param) => ContactAdmin());
         }
 
         private void UpdateCurrentViewModelBasedOnTab()
@@ -106,10 +116,13 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 case 3: // Patients tab
                     CurrentViewModel = _serviceProvider.GetRequiredService<PatientViewModel>();
                     break;
-                case 4: // Medications tab
+                case 4: // Appointments tab
+                    CurrentViewModel = _serviceProvider.GetRequiredService<AppointmentViewModel>();
+                    break;
+                case 5: // Medications tab
                     CurrentViewModel = _serviceProvider.GetRequiredService<MedicationViewModel>();
                     break;
-                case 5: // Invoices tab
+                case 6: // Invoices tab
                     CurrentViewModel = _serviceProvider.GetRequiredService<InvoiceViewModel>();
                     break;
                 default:
@@ -184,21 +197,22 @@ namespace HospitalManagementSystem_WPF.ViewModel
             PatientTabVisibility = Visibility.Collapsed;
             MedicationTabVisibility = Visibility.Collapsed;
             InvoiceTabVisibility = Visibility.Collapsed;
+            AppointmentTabVisibility = Visibility.Collapsed;
 
             AddButtonVisibility = Visibility.Collapsed;
             EditButtonVisibility = Visibility.Collapsed;
             DeleteButtonVisibility = Visibility.Collapsed;
             NewRoleButtonVisibility = Visibility.Collapsed;
 
-            // luôn cho xem Patient
-            PatientTabVisibility = Visibility.Visible;
-
             bool defaultTabSet = false;
+            bool hasAnyPermission = false;
 
             if (role?.RolePermissions != null)
             {
                 foreach (var rp in role.RolePermissions)
                 {
+                    hasAnyPermission = true;
+
                     switch (rp.Permission.PermissionId)
                     {
                         case 1:
@@ -245,7 +259,7 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             MedicationTabVisibility = Visibility.Visible;
                             if (!defaultTabSet)
                             {
-                                SelectedTabIndex = 4;
+                                SelectedTabIndex = 5;
                                 CurrentViewModel = _serviceProvider.GetRequiredService<MedicationViewModel>();
                                 defaultTabSet = true;
                             }
@@ -255,8 +269,18 @@ namespace HospitalManagementSystem_WPF.ViewModel
                             InvoiceTabVisibility = Visibility.Visible;
                             if (!defaultTabSet)
                             {
-                                SelectedTabIndex = 5;
+                                SelectedTabIndex = 6;
                                 CurrentViewModel = _serviceProvider.GetRequiredService<InvoiceViewModel>();
+                                defaultTabSet = true;
+                            }
+                            break;
+
+                        case 12:
+                            AppointmentTabVisibility = Visibility.Visible;
+                            if (!defaultTabSet)
+                            {
+                                SelectedTabIndex = 4;
+                                CurrentViewModel = _serviceProvider.GetRequiredService<AppointmentViewModel>();
                                 defaultTabSet = true;
                             }
                             break;
@@ -272,11 +296,33 @@ namespace HospitalManagementSystem_WPF.ViewModel
                 }
             }
 
-            // Nếu vẫn chưa chọn tab nào (role không có gì ngoài Patient)
-            if (!defaultTabSet)
+            // kiểm tra và thiết lập HasPermission
+            CheckPermissions();
+
+            // role không có permission nào
+            if (!hasAnyPermission)
             {
-                SelectedTabIndex = 3;
-                CurrentViewModel = _serviceProvider.GetRequiredService<PatientViewModel>();
+                CurrentViewModel = _serviceProvider.GetRequiredService<NoPermissionViewModel>();
+
+                // Ẩn tất cả tabs
+                StaffTabVisibility = Visibility.Collapsed;
+                DepartmentTabVisibility = Visibility.Collapsed;
+                RoomTabVisibility = Visibility.Collapsed;
+                PatientTabVisibility = Visibility.Collapsed;
+                MedicationTabVisibility = Visibility.Collapsed;
+                InvoiceTabVisibility = Visibility.Collapsed;
+                AppointmentTabVisibility = Visibility.Collapsed;
+
+                // Ẩn tất cả buttons
+                AddButtonVisibility = Visibility.Collapsed;
+                EditButtonVisibility = Visibility.Collapsed;
+                DeleteButtonVisibility = Visibility.Collapsed;
+                NewRoleButtonVisibility = Visibility.Collapsed;
+            }
+            else if (!defaultTabSet)
+            {
+                SelectedTabIndex = 0;
+                CurrentViewModel = _serviceProvider.GetRequiredService<StaffViewModel>();
             }
 
             // Chỉ Admin mới có quyền tạo role mới
@@ -287,12 +333,24 @@ namespace HospitalManagementSystem_WPF.ViewModel
             OnPropertyChanged(nameof(DepartmentTabVisibility));
             OnPropertyChanged(nameof(RoomTabVisibility));
             OnPropertyChanged(nameof(PatientTabVisibility));
+            OnPropertyChanged(nameof(AppointmentTabVisibility));
             OnPropertyChanged(nameof(MedicationTabVisibility));
             OnPropertyChanged(nameof(InvoiceTabVisibility));
             OnPropertyChanged(nameof(AddButtonVisibility));
             OnPropertyChanged(nameof(EditButtonVisibility));
             OnPropertyChanged(nameof(DeleteButtonVisibility));
             OnPropertyChanged(nameof(NewRoleButtonVisibility));
+        }
+
+        private void CheckPermissions()
+        {
+            HasPermission = StaffTabVisibility == Visibility.Visible ||
+                            DepartmentTabVisibility == Visibility.Visible ||
+                            RoomTabVisibility == Visibility.Visible ||
+                            PatientTabVisibility == Visibility.Visible ||
+                            AppointmentTabVisibility == Visibility.Visible ||
+                            MedicationTabVisibility == Visibility.Visible ||
+                            InvoiceTabVisibility == Visibility.Visible;
         }
 
         public void UpdateCurrentUserIfEdited(User editedUser)
@@ -329,7 +387,13 @@ namespace HospitalManagementSystem_WPF.ViewModel
             roleDialog.ShowDialog();
         }
 
-        private void Logout()
+        private void ContactAdmin()
+        {
+            MessageBox.Show("Liên hệ quản trị viên:\n- Email: admin@hms.com\n- SĐT: 0900.000.001",
+                "Thông tin liên hệ", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public void Logout()
         {
             Application.Current.Dispatcher.Invoke(() =>
             {

@@ -6,7 +6,7 @@ public partial class Patient
 
     public string FullName { get; set; } = null!;
 
-    public DateOnly? DateOfBirth { get; set; }
+    public DateTime? DateOfBirth { get; set; }
 
     public string? Gender { get; set; }
 
