@@ -10,5 +10,7 @@ public partial class Inventory
 
     public string? Location { get; set; }
 
+    public DateTime LastUpdated { get; set; } = DateTime.Now;
+
     public virtual Medication Medication { get; set; } = null!;
 }

@@ -1,5 +1,4 @@
 ﻿using DataAccess.Repositories.IRepository;
-using HospitalManagementSystem_WPF.ViewModel;
 using System.Windows;
 
 namespace HospitalManagementSystem_WPF.View

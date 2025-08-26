@@ -10,6 +10,6 @@ namespace DataAccess.Repositories.RepositoryImp
         public async Task<Medication?> GetMedicationByIdAsync(int id) => await dao.GetMedicationByIdAsync(id);
         public async Task AddMedicationAsync(Medication medication) => await dao.AddMedicationAsync(medication);
         public async Task UpdateMedicationAsync(Medication medication) => await dao.UpdateMedicationAsync(medication);
-        public async Task DeleteMedicationAsync(int id) => await dao.DeleteMedicationAsync(id);
+        public async Task DeleteMedicationAsync(int id) => await dao.DeleteMedicationAsync(id); // đã soft delete
     }
 }

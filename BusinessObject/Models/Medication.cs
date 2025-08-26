@@ -10,6 +10,8 @@ public partial class Medication
 
     public string? Unit { get; set; }
 
+    public bool IsDeleted { get; set; } = false;
+
     public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 
     public virtual ICollection<PrescriptionDetail> PrescriptionDetails { get; set; } = new List<PrescriptionDetail>();

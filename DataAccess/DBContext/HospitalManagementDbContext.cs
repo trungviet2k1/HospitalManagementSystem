@@ -123,6 +123,8 @@ public partial class HospitalManagementDbContext : DbContext
             entity.Property(e => e.InventoryId).HasColumnName("InventoryID");
             entity.Property(e => e.Location).HasMaxLength(100);
             entity.Property(e => e.MedicationId).HasColumnName("MedicationID");
+            entity.Property(e => e.LastUpdated).HasDefaultValueSql("GETDATE()")
+                  .ValueGeneratedOnAddOrUpdate();
 
             entity.HasOne(d => d.Medication).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.MedicationId)
@@ -152,6 +154,7 @@ public partial class HospitalManagementDbContext : DbContext
             entity.Property(e => e.MedicationId).HasColumnName("MedicationID");
             entity.Property(e => e.MedicationName).HasMaxLength(100);
             entity.Property(e => e.Unit).HasMaxLength(50);
+            entity.HasQueryFilter(m => !m.IsDeleted);
         });
 
         modelBuilder.Entity<Patient>(entity =>

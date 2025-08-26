@@ -275,9 +275,12 @@ namespace HospitalManagementSystem_WPF.ViewModel
                     var isAvailable = await _appointmentRepository.IsTimeSlotAvailableAsync(
                         appointment.DoctorId, appointment.AppointmentDate);
 
+                    var doctor = await _userRepository.GetUserByIdAsync(appointment.DoctorId);
+
                     if (!isAvailable)
                     {
-                        MessageBox.Show("Bác sĩ đã có lịch hẹn trong khoảng thời gian này. Vui lòng chọn thời gian khác.",
+                        MessageBox.Show(
+                            $"Bác sĩ {doctor?.FullName} đã có lịch hẹn trong khoảng thời gian này. Vui lòng chọn thời gian khác.",
                             "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
